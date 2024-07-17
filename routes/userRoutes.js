@@ -20,5 +20,14 @@ userRouter.get("/logout", auth.authenticate, userController.logout);
 // Route to activate user account
 userRouter.get("/activate/:id", userController.activateUser);
 
+// Route for forgot password
+userRouter.post("/forgot", userController.forgotPassword);
+
+// Route for verifying auth string
+userRouter.get("/verify/:authString", userController.authVerify);
+
+// Route for resetting the password
+userRouter.post("/reset", userController.resetPassword);
+
 // Exporting the router
 module.exports = userRouter;
