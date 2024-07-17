@@ -1,0 +1,29 @@
+{
+  "name": "project-management-tool-be",
+  "version": "1.0.0",
+  "description": "This is the backend for a project management application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-sathya17/Project-management-tool-backend.git"
+  },
+  "author": "Sathyanarayanan.V",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dev-sathya17/Project-management-tool-backend/issues"
+  },
+  "homepage": "https://github.com/dev-sathya17/Project-management-tool-backend#readme",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
