@@ -67,9 +67,13 @@ const auth = {
   // Middleware to check if the user account is activated
   isActivated: async (request, response, next) => {
     try {
-      const userId = request.userId;
-      const user = await User.findById(userId);
-
+      let user = null;
+      // Checking if the user is already activated before or after logging in
+      if (request.userId) {
+        user = await User.findById(request.userId);
+      } else {
+        user = await User.findOne({ email: request.body.email });
+      }
       // If user is not found
       if (!user) {
         return response.status(404).send({ message: "User not found" });

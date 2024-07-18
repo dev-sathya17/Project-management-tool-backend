@@ -3,13 +3,16 @@ const express = require("express");
 
 // Importing the user Controller
 const userController = require("../controllers/userController");
+
+// Importing middleware
 const auth = require("../middlewares/auth");
+const files = require("../middlewares/multer");
 
 // Creating a router
 const userRouter = express.Router();
 
 // Route to register a user
-userRouter.post("/", userController.register);
+userRouter.post("/", files.single("image"), userController.register);
 
 // Route for user login
 userRouter.post("/login", auth.isActivated, userController.login);
@@ -51,6 +54,7 @@ userRouter.put(
   "/",
   auth.authenticate,
   auth.isActivated,
+  files.single("image"),
   userController.updateProfile
 );
 

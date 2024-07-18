@@ -21,11 +21,16 @@ const userController = {
   register: async (req, res) => {
     try {
       // Destructuring the request body
-      const { firstName, lastName, email, password, salaryPerMonth, role } =
+      const { firstName, lastName, email, password, salaryPerMonth, mobile } =
         req.body;
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
 
       // Checking if user already exists
       const existingUser = await User.findOne({ email });
+
       if (existingUser) {
         return res.json({ message: "User with this email already exists" });
       }
@@ -40,6 +45,8 @@ const userController = {
         email,
         password: hashedPassword,
         salaryPerMonth,
+        mobile,
+        image: req.file ? req.file.path : "avatar.png",
       });
 
       // Saving the user to the database
@@ -271,7 +278,7 @@ const userController = {
     try {
       // Getting user id from request parameters
       const id = req.userId;
-      const { firstName, lastName, salaryPerMonth, email } = req.body;
+      const { firstName, lastName, salaryPerMonth, email, mobile } = req.body;
 
       const user = await User.findById(id);
 
@@ -285,6 +292,8 @@ const userController = {
       user.lastName = lastName || user.lastName;
       user.salaryPerMonth = salaryPerMonth || user.salaryPerMonth;
       user.email = email || user.email;
+      user.mobile = mobile || user.mobile;
+      user.image = req.file ? req.file.path : user.image;
 
       // Saving info to the database
       const updatedUser = await user.save();
