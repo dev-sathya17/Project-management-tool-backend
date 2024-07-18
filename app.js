@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // Creating routes
-app.use("/users", userRouter);
+app.use("/api/v1/users", userRouter);
 
 // Export the express app
 module.exports = app;

@@ -21,7 +21,8 @@ const userController = {
   register: async (req, res) => {
     try {
       // Destructuring the request body
-      const { firstName, lastName, email, password, salaryPerMonth } = req.body;
+      const { firstName, lastName, email, password, salaryPerMonth, role } =
+        req.body;
 
       // Checking if user already exists
       const existingUser = await User.findOne({ email });
@@ -234,6 +235,101 @@ const userController = {
 
       // Sending a success response
       res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to get user profile information
+  getProfile: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+      const id = req.userId;
+
+      // Fetching the user from the database
+      const user = await User.findById(
+        id,
+        "-password -isActive -authString -__v"
+      );
+
+      // If user not found, return error response
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // If user found, return the user data
+      res.json(user);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to update user profile information
+  updateProfile: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+      const id = req.userId;
+      const { firstName, lastName, salaryPerMonth, email } = req.body;
+
+      const user = await User.findById(id);
+
+      // If user not found, return error response
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Updating user profile information
+      user.firstName = firstName || user.firstName;
+      user.lastName = lastName || user.lastName;
+      user.salaryPerMonth = salaryPerMonth || user.salaryPerMonth;
+      user.email = email || user.email;
+
+      // Saving info to the database
+      const updatedUser = await user.save();
+
+      // If user found, return the updated user data
+      res.json({ message: "User profile updated successfully", updatedUser });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to delete user
+  deleteUser: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+      const id = req.userId;
+
+      // Finding and deleting the user from the database using the id in the request parameters.
+      const user = await User.findByIdAndDelete(id);
+
+      // If user not found, return error response
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Removing the user cookie
+      res.clearCookie("token");
+
+      // returning success response, if user is deleted
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch all users from the database
+  getAllUsers: async (req, res) => {
+    try {
+      // Fetching all users from the database
+      const users = await User.find();
+
+      // Returning the fetched users
+      res.json(users);
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });
