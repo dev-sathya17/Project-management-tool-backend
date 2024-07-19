@@ -36,5 +36,22 @@ projectRouter.get(
   projectController.getProjectById
 );
 
+// Route to update a project
+projectRouter.put(
+  "/:id",
+  auth.authenticate,
+  auth.authorize,
+  files.array("attachments"),
+  projectController.updateProject
+);
+
+// Route to delete a project
+projectRouter.delete(
+  "/:id",
+  auth.authenticate,
+  auth.authorize,
+  projectController.deleteProject
+);
+
 // Exporting the router
 module.exports = projectRouter;
