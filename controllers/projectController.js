@@ -38,6 +38,30 @@ const projectController = {
       res.status(500).json({ message: error.message, error });
     }
   },
+  // API to retrieve all projects
+  getAllProjects: async (req, res) => {
+    try {
+      // Finding all projects in the database
+      const projects = await Project.find({});
+      // Sending a success response with the fetched projects
+      res.json(projects);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+  // API to retrieve a specific project by its ID
+  getProjectById: async (req, res) => {
+    try {
+      // Finding the project by its ID in the database
+      const project = await Project.findById(req.params.id);
+      // Sending a success response with the fetched project
+      res.json(project);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller

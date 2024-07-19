@@ -20,5 +20,21 @@ projectRouter.post(
   projectController.createProject
 );
 
+// Route to get all projects
+projectRouter.get(
+  "/",
+  auth.authenticate,
+  auth.authorize,
+  projectController.getAllProjects
+);
+
+// Route to get a specific project
+projectRouter.get(
+  "/:id",
+  auth.authenticate,
+  auth.authorize,
+  projectController.getProjectById
+);
+
 // Exporting the router
 module.exports = projectRouter;
