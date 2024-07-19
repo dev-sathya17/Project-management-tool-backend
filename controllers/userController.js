@@ -57,7 +57,7 @@ const userController = {
         from: EMAIL_ID,
         to: email,
         subject: "Activate your account",
-        text: `Click here to reset your password: http://localhost:3000/users/activate/${user._id}`,
+        text: `Click here to activate your account: http://localhost:3000/users/activate/${user._id}`,
       });
 
       // Sending a success response
