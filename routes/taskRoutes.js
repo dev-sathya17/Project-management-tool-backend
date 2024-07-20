@@ -38,5 +38,14 @@ taskRouter.get(
   taskController.getAllTasksByUserId
 );
 
+// Route for updating a task
+taskRouter.put(
+  "/tasks/:taskId",
+  auth.authenticate,
+  auth.authorize,
+  files.array("attachments"),
+  taskController.updateTask
+);
+
 // Exporting the router
 module.exports = taskRouter;

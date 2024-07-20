@@ -93,6 +93,49 @@ const taskController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to update a task
+  updateTask: async (req, res) => {
+    try {
+      // Getting task id from request params
+      const taskId = req.params.taskId;
+
+      // Destructuring the request body
+      const { title, description, deadline, priority, assignedTo, status } =
+        req.body;
+
+      // Fetching the task to be updated
+      const task = await Task.findById(taskId);
+
+      // Check if the task id is existing
+      if (!task) {
+        return res.status(404).json({ message: "Task id is invalid" });
+      }
+
+      // Updating the task properties
+      task.title = title || task.title;
+      task.description = description || task.description;
+      task.deadline = deadline ? new Date(deadline) : task.deadline;
+      task.priority = priority || task.priority;
+      task.status = status || task.status;
+      task.assignedTo = assignedTo
+        ? await User.findById(assignedTo)
+        : task.assignedTo;
+
+      if (req.files) {
+        const updatedFiles = req.files.map((file) => file.path);
+        task.attachments.push(...updatedFiles);
+      }
+
+      await task.save();
+
+      // Sending a success response with the updated task
+      res.json({ message: "Task updated successfully", task });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller object
