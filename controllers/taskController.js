@@ -53,6 +53,46 @@ const taskController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to get all tasks by project id
+  getAllTasksByProjectId: async (req, res) => {
+    try {
+      // Getting project id from request params
+      const projectId = req.params.projectId;
+      // Fetching the project to which the tasks will be fetched
+      const project = await Project.findById(projectId).populate("tasks");
+      // Check if the project id is existing
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+      // Sending a success response with the fetched tasks
+      res.json(project.tasks);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to get all tasks by the user it is assigned to
+  getAllTasksByUserId: async (req, res) => {
+    try {
+      // Getting user id from request params
+      const userId = req.params.userId;
+      // Fetching the user to which the tasks will be fetched
+      const user = await User.findById(userId);
+      // Check if the user id is existing
+      if (!user) {
+        return res.status(404).json({ message: "User id is invalid" });
+      }
+      // Fetching all tasks assigned to the user
+      const tasks = await Task.find({ assignedTo: user._id });
+      // Sending a success response with the fetched tasks
+      res.json(tasks);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller object

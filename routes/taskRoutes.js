@@ -20,5 +20,23 @@ taskRouter.post(
   taskController.createTask
 );
 
+// Route for getting all tasks for a project
+
+taskRouter.get(
+  "/:projectId/tasks",
+  auth.authenticate,
+  auth.authorize,
+  taskController.getAllTasksByProjectId
+);
+
+// Route for getting all tasks by user it is assigned to
+
+taskRouter.get(
+  "/tasks/:userId",
+  auth.authenticate,
+  auth.authorize,
+  taskController.getAllTasksByUserId
+);
+
 // Exporting the router
 module.exports = taskRouter;
