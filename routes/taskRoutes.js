@@ -47,5 +47,13 @@ taskRouter.put(
   taskController.updateTask
 );
 
+// Route for deleting a task
+taskRouter.delete(
+  "/:projectId/tasks/:taskId",
+  auth.authenticate,
+  auth.authorize,
+  taskController.deleteTask
+);
+
 // Exporting the router
 module.exports = taskRouter;

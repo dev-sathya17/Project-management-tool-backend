@@ -3,6 +3,10 @@ const Task = require("../models/task");
 const Project = require("../models/project");
 const User = require("../models/user");
 
+// Importing the fs library to delete files
+const fs = require("fs");
+const path = require("path");
+
 // Creating a controller object
 const taskController = {
   //API to create a task
@@ -131,6 +135,70 @@ const taskController = {
 
       // Sending a success response with the updated task
       res.json({ message: "Task updated successfully", task });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to delete a task
+  deleteTask: async (req, res) => {
+    try {
+      // Getting task id from request params
+      const taskId = req.params.taskId;
+
+      // Fetching the task to be deleted
+      const task = await Task.findById(taskId);
+
+      // Check if the task id is existing
+      if (!task) {
+        return res.status(404).json({ message: "Task id is invalid" });
+      }
+
+      if (task.attachments.length === 0) {
+        await task.deleteOne({ _id: taskId });
+        return res.json({ message: "Task deleted successfully" });
+      }
+
+      // Flag variable to delete project only after files are removed
+      let isFilesDeleted = false;
+
+      // Deleting associated attachments from the directory
+      task.attachments.forEach((attachment) => {
+        const [folder, filename] = attachment.split("\\");
+        const filePath = path.join(folder, filename);
+        try {
+          fs.unlinkSync(filePath);
+          console.log(`Deleted file: ${filePath}`);
+          isFilesDeleted = true;
+        } catch (err) {
+          console.error(`Error deleting file: ${filePath}`, err);
+          isFilesDeleted = false;
+          res.status(500).json({
+            message: "There was an error with deleting attachments of the task",
+          });
+        }
+      });
+
+      // Deleting the task from the database after file deletion
+      if (isFilesDeleted) {
+        await task.deleteOne({ _id: taskId });
+
+        // Removing the task from the project
+        const project = await Project.findByIdAndUpdate(
+          req.params.projectId,
+          { $pull: { tasks: taskId } },
+          { new: true }
+        );
+
+        // Sending a success response
+        res.json({ message: "Task deleted successfully" });
+      } else {
+        res.status(500).json({
+          message: "There was an error with deleting attachments of the task",
+        });
+      }
+      // Sending a success response
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

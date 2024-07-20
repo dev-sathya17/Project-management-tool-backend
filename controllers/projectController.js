@@ -149,11 +149,14 @@ const projectController = {
         } catch (err) {
           console.error(`Error deleting file: ${filePath}`, err);
           isFilesDeleted = false;
+          res.status(500).json({
+            message:
+              "There was an error with deleting attachments of the project",
+          });
         }
       });
 
       // Deleting the project from the database after file deletion
-      console.log(isFilesDeleted);
       if (isFilesDeleted) {
         await project.deleteOne({ _id: req.params.id });
         // Sending a success response
