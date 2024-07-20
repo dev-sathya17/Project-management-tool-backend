@@ -2,6 +2,7 @@ const { calculateDurationInMonths } = require("../helpers/projectHelper");
 
 const Project = require("../models/project");
 const User = require("../models/user");
+const Task = require("../models/task");
 
 const fs = require("fs");
 const path = require("path");
@@ -247,6 +248,38 @@ const projectController = {
       await project.save();
       // Sending a success response with the updated project
       res.json({ message: "Member removed successfully", project });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to find completion percentage of the project
+  getCompletionPercentage: async (req, res) => {
+    try {
+      // Getting project id from request params
+      const id = req.params.id;
+
+      // Fetching the project to calculate completion percentage
+      const project = await Project.findById(id).populate("tasks");
+
+      // Check if the project id is existing
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      // Calculating completion percentage
+      const completedTasks = project.tasks.filter((task) => {
+        return task.status === "completed";
+      }).length;
+      const totalTasks = project.tasks.length;
+      const completionPercentage = (completedTasks / totalTasks) * 100 || 0;
+
+      // Sending a success response with the completion percentage
+      res.json({
+        message: "Completion percentage calculated successfully",
+        completionPercentage,
+      });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

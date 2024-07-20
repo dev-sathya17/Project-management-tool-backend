@@ -248,6 +248,38 @@ const taskController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to get the task completion percentage
+  getTaskCompletionPercentage: async (req, res) => {
+    try {
+      // Getting task id from request params
+      const id = req.params.taskId;
+
+      // Fetching the task to calculate completion percentage
+      const task = await Task.findById(id).populate("subTasks");
+
+      // Check if the task id is existing
+      if (!task) {
+        return res.status(404).json({ message: "Task id is invalid" });
+      }
+
+      // Calculating completion percentage
+      const completedTasks = task.subTasks.filter((task) => {
+        return task.status === "completed";
+      }).length;
+      const totalTasks = task.subTasks.length;
+      const completionPercentage = (completedTasks / totalTasks) * 100 || 0;
+
+      // Sending a success response with the completion percentage
+      res.json({
+        message: "Completion percentage calculated successfully",
+        completionPercentage,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller object

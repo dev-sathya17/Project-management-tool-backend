@@ -56,12 +56,19 @@ taskRouter.delete(
 );
 
 // Route for removing attachments from a task
-
 taskRouter.delete(
   "/tasks/:taskId/attachments/:filename",
   auth.authenticate,
   auth.authorize,
   taskController.removeAttachments
+);
+
+// Route to get the task completion percentage
+taskRouter.get(
+  "/tasks/:taskId/completion",
+  auth.authenticate,
+  auth.authorize,
+  taskController.getTaskCompletionPercentage
 );
 
 // Exporting the router
