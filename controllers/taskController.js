@@ -185,7 +185,7 @@ const taskController = {
         await task.deleteOne({ _id: taskId });
 
         // Removing the task from the project
-        const project = await Project.findByIdAndUpdate(
+        await Project.findByIdAndUpdate(
           req.params.projectId,
           { $pull: { tasks: taskId } },
           { new: true }
@@ -199,6 +199,50 @@ const taskController = {
         });
       }
       // Sending a success response
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to remove attachments from the task
+  removeAttachments: async (req, res) => {
+    try {
+      // Getting task id from request params
+      const taskId = req.params.taskId;
+
+      // Getting the attachments to be removed from the request body
+      const filename = req.params.filename;
+
+      // Fetching the task to which the attachments will be removed
+      const task = await Task.findById(taskId);
+
+      // Check if the task id is existing
+      if (!task) {
+        return res.status(404).json({ message: "Task id is invalid" });
+      }
+
+      // Deleting the specified attachments from the directory
+      const filePath = path.join("uploads", filename);
+      try {
+        fs.unlinkSync(filePath);
+        console.log(`Deleted file: ${filePath}`);
+      } catch (err) {
+        console.error(`Error deleting file: ${filePath}`, err);
+        res
+          .status(500)
+          .json({ message: "There was an error with deleting attachments" });
+      }
+
+      // Removing the specified attachments from the task
+      task.attachments = task.attachments.filter(
+        (attachment) => attachment.split("\\")[1] !== filename
+      );
+
+      // Saving the updated task to the database
+      await task.save();
+      // Sending a success response with the updated task
+      res.json({ message: "Attachments removed successfully", task });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

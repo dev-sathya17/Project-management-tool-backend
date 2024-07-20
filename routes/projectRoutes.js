@@ -53,5 +53,21 @@ projectRouter.delete(
   projectController.deleteProject
 );
 
+// Route to remove attachments from a project
+projectRouter.delete(
+  "/:id/attachments/:filename",
+  auth.authenticate,
+  auth.authorize,
+  projectController.removeAttachments
+);
+
+// Route to remove members from a project
+projectRouter.delete(
+  "/:id/members/:memberId",
+  auth.authenticate,
+  auth.authorize,
+  projectController.removeMembers
+);
+
 // Exporting the router
 module.exports = projectRouter;

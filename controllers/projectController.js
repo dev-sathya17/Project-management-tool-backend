@@ -83,6 +83,11 @@ const projectController = {
       // Fetching project to be updated
       const project = await Project.findById(req.params.id);
 
+      //checking if the project exists
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+
       project.title = title || project.title;
       project.description = description || project.description;
       project.startDate = startDate ? new Date(startDate) : project.startDate;
@@ -167,6 +172,81 @@ const projectController = {
             "There was an error with deleting attachments of the project",
         });
       }
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to remove attachments from the project
+  removeAttachments: async (req, res) => {
+    try {
+      // Getting project id from request params
+      const id = req.params.id;
+
+      // Getting the attachments to be removed from the request body
+      const filename = req.params.filename;
+
+      // Fetching the project to which the attachments will be removed
+      const project = await Project.findById(id);
+
+      // Check if the project id is existing
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      // Deleting the specified attachments from the directory
+      const filePath = path.join("uploads", filename);
+      try {
+        fs.unlinkSync(filePath);
+        console.log(`Deleted file: ${filePath}`);
+      } catch (err) {
+        console.error(`Error deleting file: ${filePath}`, err);
+        res
+          .status(500)
+          .json({ message: "There was an error with deleting attachments" });
+      }
+
+      // Removing the specified attachments from the project
+      project.attachments = project.attachments.filter(
+        (attachment) => attachment.split("\\")[1] !== filename
+      );
+
+      // Saving the updated project to the database
+      await project.save();
+      // Sending a success response with the updated project
+      res.json({ message: "Attachments removed successfully", project });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to remove project members from the project
+  removeMembers: async (req, res) => {
+    try {
+      // Getting project id from request params
+      const id = req.params.id;
+      // Getting the members to be removed from the request body
+      const memberId = req.params.memberId;
+
+      // Fetching the project to which the members will be removed
+      const project = await Project.findById(id);
+
+      // Check if the project id is existing
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      // Removing the specified members from the project
+      project.members = project.members.filter(
+        (member) => member.toString() !== memberId
+      );
+
+      // Saving the updated project to the database
+      await project.save();
+      // Sending a success response with the updated project
+      res.json({ message: "Member removed successfully", project });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

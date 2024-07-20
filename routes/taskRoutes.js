@@ -55,5 +55,14 @@ taskRouter.delete(
   taskController.deleteTask
 );
 
+// Route for removing attachments from a task
+
+taskRouter.delete(
+  "/tasks/:taskId/attachments/:filename",
+  auth.authenticate,
+  auth.authorize,
+  taskController.removeAttachments
+);
+
 // Exporting the router
 module.exports = taskRouter;
