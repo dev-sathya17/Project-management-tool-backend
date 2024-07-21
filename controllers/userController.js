@@ -7,6 +7,9 @@ const jwt = require("jsonwebtoken");
 // Importing the User model
 const User = require("../models/user");
 
+// Importing the Task model
+const Task = require("../models/task");
+
 // Importing the transporter for sending emails
 const transporter = require("../utils/transporter");
 
@@ -339,6 +342,42 @@ const userController = {
 
       // Returning the fetched users
       res.json(users);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch task details for the user
+  getUserTasks: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+      const id = req.userId;
+      // Fetching user tasks from the database using the user id
+      const tasks = await Task.find({ assignedTo: id });
+
+      // Fetching completed tasks
+      const completedTasks = tasks.filter(
+        (task) => task.status === "completed"
+      );
+
+      // Fetching pending tasks
+      const pendingTasks = tasks.filter((task) => task.status !== "completed");
+
+      // Fetching any task that needs to be completed today
+      const todayTasks = tasks.filter(
+        (task) =>
+          task.deadline.toISOString().slice(0, 10) ===
+            new Date().toISOString().slice(0, 10) && task.status !== "completed"
+      );
+
+      // Returning the fetched tasks
+      res.json({
+        pending: pendingTasks.length,
+        completed: completedTasks.length,
+        today: todayTasks.length,
+        total: tasks.length,
+      });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

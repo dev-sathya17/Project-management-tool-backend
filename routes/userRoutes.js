@@ -66,6 +66,14 @@ userRouter.delete(
   userController.deleteUser
 );
 
+// Route to fetch user task details
+userRouter.get(
+  "/tasks",
+  auth.authenticate,
+  auth.isActivated,
+  userController.getUserTasks
+);
+
 // Admin Routes
 // Fetching all users
 userRouter.get(
