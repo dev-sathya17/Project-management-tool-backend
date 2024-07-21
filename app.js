@@ -18,6 +18,8 @@ const morgan = require("morgan");
 
 // Importing the cookie parser library
 const cookieParser = require("cookie-parser");
+const errorHandler = require("./utils/Error");
+const logger = require("./utils/Logger");
 
 // Creating an express application
 const app = express();
@@ -29,13 +31,17 @@ app.use(cookieParser());
 app.use(express.json());
 
 // to log requests
-app.use(morgan("dev"));
+// app.use(morgan("dev"));
+app.use(logger);
 
 // Creating routes
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/projects", projectRouter);
 app.use("/api/v1/projects", taskRouter);
 app.use("/api/v1/tasks", subTaskRouter);
+
+// Handle 404 error
+app.use(errorHandler);
 
 // Export the express app
 module.exports = app;
