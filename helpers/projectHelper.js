@@ -14,7 +14,7 @@ function calculateDurationInMonths(startDate, endDate) {
   // Calculate the total months difference
   let totalMonths = yearDiff * 12 + monthDiff;
 
-  // Calculate the day difference and adjust total months
+  // Calculate the day difference and adjusting total months
   let dayDiff = endDay - startDay;
   let daysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate();
 

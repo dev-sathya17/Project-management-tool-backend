@@ -285,6 +285,129 @@ const projectController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to calculate project's risk levels
+  getProjectRiskLevels: async (req, res) => {
+    try {
+      // Getting project id from request params
+      const id = req.params.id;
+
+      // Fetching the project to calculate risk levels
+      const project = await Project.findById(id)
+        .populate("tasks")
+        .populate("members");
+
+      // Check if the project id is existing
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      const risk = [];
+
+      // Calculating risk based on budget
+      const pay = project.members.reduce((acc, member) => {
+        acc += member.salaryPerMonth;
+        return acc;
+      }, 0);
+
+      const cost = pay * project.duration;
+
+      if (cost > project.budget) {
+        const riskObj = {};
+        riskObj.type = "budget";
+        riskObj.difference = cost - project.budget;
+        riskObj.percentage = (
+          (riskObj.difference / project.budget) *
+          100
+        ).toFixed(2);
+        if (riskObj.percentage < 30) {
+          riskObj.impact = "low";
+        } else if (riskObj.percentage >= 30 && riskObj.percentage < 60) {
+          riskObj.impact = "medium";
+        } else {
+          riskObj.impact = "high";
+        }
+        riskObj.description = `Project is over the stipulated budget of ${project.budget}. Either increase budget by ${riskObj.difference} or layoff a member from the project`;
+        risk.push(riskObj);
+      } else {
+        const riskObj = {};
+        riskObj.type = "budget";
+        riskObj.difference = 0;
+        riskObj.percentage = 0;
+        riskObj.impact = "none";
+        riskObj.description = "Project is within budget";
+        risk.push(riskObj);
+      }
+
+      // Calculating risk based on task completion percentage
+      const completedTasks = project.tasks.filter((task) => {
+        return task.status === "completed";
+      }).length;
+      const totalTasks = project.tasks.length;
+      const taskCompletionPercentage = (completedTasks / totalTasks) * 100;
+
+      // Calculating remaining duration for the project
+      const date = new Date();
+      const today = `${date.getFullYear()}-${
+        parseInt(date.getMonth()) + 1
+      }-${date.getDate()}`;
+
+      const remainingDuration = calculateDurationInMonths(
+        new Date(today),
+        new Date(project.endDate)
+      );
+
+      const durationPercentage = (remainingDuration / project.duration) * 100;
+
+      if (durationPercentage < taskCompletionPercentage) {
+        const riskObj = {};
+
+        riskObj.type = "time";
+        riskObj.difference = (project.duration - remainingDuration).toFixed(2);
+        riskObj.percentage = (
+          (riskObj.difference / project.duration) *
+          100
+        ).toFixed(2);
+
+        if (riskObj.percentage < 30) {
+          riskObj.impact = "low";
+        } else if (riskObj.percentage >= 30 && riskObj.percentage < 60) {
+          riskObj.impact = "medium";
+        } else {
+          riskObj.impact = "high";
+        }
+
+        riskObj.description = `Project is ${
+          riskObj.percentage
+        }% behind schedule. It is suggested to increase the duration by ${
+          riskObj.difference < 1
+            ? `${riskObj.difference * 30} days`
+            : `${riskObj.difference} months`
+        }`;
+
+        risk.push(riskObj);
+      } else {
+        const riskObj = {};
+
+        riskObj.type = "time";
+        riskObj.difference = 0;
+        riskObj.percentage = 0;
+        riskObj.impact = "none";
+        riskObj.description = "Project is on schedule";
+
+        risk.push(riskObj);
+      }
+
+      // Sending a success response
+      res.json({
+        message: "Risk levels calculated successfully",
+        risk,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller

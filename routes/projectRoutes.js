@@ -77,5 +77,13 @@ projectRouter.get(
   projectController.getCompletionPercentage
 );
 
+// Route to get a specific project's risk assessment
+projectRouter.get(
+  "/:id/risks",
+  auth.authenticate,
+  auth.authorize,
+  projectController.getProjectRiskLevels
+);
+
 // Exporting the router
 module.exports = projectRouter;
