@@ -85,5 +85,13 @@ projectRouter.get(
   projectController.getProjectRiskLevels
 );
 
+// Route to get a project's task statuses
+projectRouter.get(
+  "/:id/task-status",
+  auth.authenticate,
+  auth.authorize,
+  projectController.getProjectTaskStatus
+);
+
 // Exporting the router
 module.exports = projectRouter;

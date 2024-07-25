@@ -408,6 +408,58 @@ const projectController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to fetch task status information for a project
+  getProjectTaskStatus: async (req, res) => {
+    try {
+      // Getting project id from request params
+      const id = req.params.id;
+
+      // Fetching the project to calculate task status
+      const project = await Project.findById(id).populate("tasks");
+
+      // Check if the project id is existing
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      // Initializing task status counters
+      let pending = 0,
+        completed = 0,
+        backlogs = 0,
+        idle = 0;
+
+      // Iterating through tasks to count task status
+      project.tasks.forEach((task) => {
+        switch (task.status) {
+          case "in-progress":
+            pending++;
+            break;
+          case "completed":
+            completed++;
+            break;
+          case "backlog":
+            backlogs++;
+            break;
+          case "idle":
+            idle++;
+            break;
+        }
+      });
+
+      // Sending a success response with task status counts
+      res.json({
+        message: "Task status information fetched successfully",
+        pending,
+        completed,
+        backlogs,
+        idle,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller
