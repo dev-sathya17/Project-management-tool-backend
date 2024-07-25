@@ -108,12 +108,21 @@ userRouter.get(
 );
 
 // Admin Routes
+
 // Fetching all users
 userRouter.get(
   "/admin/users",
   auth.authenticate,
   auth.isAdmin,
   userController.getAllUsers
+);
+
+// Fetching user types with their counts
+userRouter.get(
+  "/admin/user-types",
+  auth.authenticate,
+  auth.isAdmin,
+  userController.getUserTypeCount
 );
 
 // Exporting the router

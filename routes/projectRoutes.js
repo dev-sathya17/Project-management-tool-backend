@@ -101,5 +101,31 @@ projectRouter.get(
   projectController.getTotalTasksPendingForToday
 );
 
+// Admin routes
+
+//Route to get the total sum invested across all projects
+projectRouter.get(
+  "/admin/totalSum",
+  auth.authenticate,
+  auth.isAdmin,
+  projectController.getTotalSumInvested
+);
+
+// Route to get project status count
+projectRouter.get(
+  "/admin/statusCount",
+  auth.authenticate,
+  auth.isAdmin,
+  projectController.getProjectStatusCount
+);
+
+// Route to get project with highest risk level
+projectRouter.get(
+  "/admin/highestRisk",
+  auth.authenticate,
+  auth.isAdmin,
+  projectController.getProjectWithHighestRiskLevels
+);
+
 // Exporting the router
 module.exports = projectRouter;

@@ -71,5 +71,15 @@ taskRouter.get(
   taskController.getTaskCompletionPercentage
 );
 
+// Admin routes
+
+// API to fetch overall task progress
+taskRouter.get(
+  "/admin/tasks/progress",
+  auth.authenticate,
+  auth.isAdmin,
+  taskController.getOverallTaskProgress
+);
+
 // Exporting the router
 module.exports = taskRouter;

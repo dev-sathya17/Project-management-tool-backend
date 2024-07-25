@@ -535,6 +535,85 @@ const projectController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  //Admin Functionalities
+
+  // API to fetch total sum invested across all projects
+  getTotalSumInvested: async (req, res) => {
+    try {
+      // Fetching all projects
+      const projects = await Project.find({});
+
+      // Iterating through projects to calculate total sum invested
+      const totalSumInvested = projects.reduce((accumulator, project) => {
+        accumulator += project.budget;
+        return accumulator;
+      }, 0);
+
+      // Sending a success response with total sum invested across all projects
+      res.json({
+        message: "Total sum invested fetched successfully",
+        totalSumInvested,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch project statistics
+  getProjectStatusCount: async (req, res) => {
+    try {
+      // Fetching all projects
+      const projects = await Project.find({});
+
+      // Initializing project status count object
+      const projectStatusCount = {
+        active: 0,
+        inactive: 0,
+        completed: 0,
+      };
+      projects.forEach((project) => {
+        projectStatusCount[project.status]++;
+      });
+
+      // Sending a success response with project status count
+      res.json({
+        message: "Project status count fetched successfully",
+        projectStatusCount,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch the project with highest risk levels
+  getProjectWithHighestRiskLevels: async (req, res) => {
+    try {
+      // Fetching all projects
+      const projects = await Project.find({});
+
+      // Initializing project with highest risk level object
+      let projectWithHighestRiskLevels = null;
+      let highestRiskLevel = 0;
+      projects.forEach((project) => {
+        const riskLevel = calculateRiskLevel(project);
+        if (riskLevel > highestRiskLevel) {
+          projectWithHighestRiskLevels = project;
+          highestRiskLevel = riskLevel;
+        }
+      });
+      // Sending a success response with project with highest risk levels
+      res.json({
+        message: "Project with highest risk levels fetched successfully",
+        projectWithHighestRiskLevels,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller

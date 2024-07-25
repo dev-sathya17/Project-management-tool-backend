@@ -338,20 +338,6 @@ const userController = {
     }
   },
 
-  // API to fetch all users from the database
-  getAllUsers: async (req, res) => {
-    try {
-      // Fetching all users from the database
-      const users = await User.find();
-
-      // Returning the fetched users
-      res.json(users);
-    } catch (error) {
-      // Sending an error response
-      res.status(500).json({ message: error.message });
-    }
-  },
-
   // API to fetch task details for the user
   getUserTasks: async (req, res) => {
     try {
@@ -479,6 +465,53 @@ const userController = {
       res.json({
         message: "User performance percentage fetched successfully",
         performancePercentage,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // Admin Functionalities
+
+  // API to fetch all users from the database
+  getAllUsers: async (req, res) => {
+    try {
+      // Fetching all users from the database
+      const users = await User.find();
+
+      // Returning the fetched users
+      res.json(users);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch total number of Team Leaders and employees
+  getUserTypeCount: async (req, res) => {
+    try {
+      // Fetching all users from the database
+      const users = await User.find();
+
+      // Initializing counters for Team Leaders and employees
+      let teamLeaders = 0;
+      let employees = 0;
+
+      // Iterating through users and updating counters
+      users.forEach((user) => {
+        if (user.role === "teamLeader") {
+          teamLeaders++;
+        } else if (user.role === "employee") {
+          employees++;
+        }
+      });
+
+      // Sending a success response with total number of Team Leaders and employees
+      res.json({
+        message: "User type count fetched successfully",
+        teamLeaders,
+        employees,
       });
     } catch (error) {
       // Sending an error response

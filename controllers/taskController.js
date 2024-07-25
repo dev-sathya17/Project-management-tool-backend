@@ -280,6 +280,54 @@ const taskController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // Admin Functionalities
+
+  // API to fetch task progress by status
+  getOverallTaskProgress: async (req, res) => {
+    try {
+      // Fetching all tasks
+      const tasks = await Task.find({});
+
+      // Initializing counters for each status
+      const completedTasks = 0;
+      const inProgressTasks = 0;
+      const pendingTasks = 0;
+      const overdueTasks = 0;
+
+      // Iterating through each task to update the counters
+      tasks.forEach((task) => {
+        switch (task.status) {
+          case "completed":
+            completedTasks++;
+            break;
+          case "in-progress":
+            inProgressTasks++;
+            break;
+          case "idle":
+            pendingTasks++;
+            break;
+          case "backlog":
+            overdueTasks++;
+            break;
+        }
+      });
+
+      // Sending a success response with the progress data
+      res.json({
+        message: "Task progress data fetched successfully",
+        progressData: {
+          completedTasks,
+          inProgressTasks,
+          pendingTasks,
+          overdueTasks,
+        },
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller object
