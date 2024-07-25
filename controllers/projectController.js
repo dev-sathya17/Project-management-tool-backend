@@ -2,7 +2,6 @@ const { calculateDurationInMonths } = require("../helpers/projectHelper");
 
 const Project = require("../models/project");
 const User = require("../models/user");
-const Task = require("../models/task");
 
 const fs = require("fs");
 const path = require("path");
@@ -30,6 +29,7 @@ const projectController = {
         members,
         budget,
         duration,
+        owner: req.userId,
         attachments: req.files ? req.files.map((file) => file.path) : [],
       });
 

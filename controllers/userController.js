@@ -22,8 +22,15 @@ const userController = {
   register: async (req, res) => {
     try {
       // Destructuring the request body
-      const { firstName, lastName, email, password, salaryPerMonth, mobile } =
-        req.body;
+      const {
+        firstName,
+        lastName,
+        email,
+        password,
+        salaryPerMonth,
+        mobile,
+        role,
+      } = req.body;
 
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -47,6 +54,7 @@ const userController = {
         password: hashedPassword,
         salaryPerMonth,
         mobile,
+        role,
         image: req.file ? req.file.path : "avatar.png",
       });
 
@@ -134,7 +142,9 @@ const userController = {
       });
 
       // sending a success response
-      res.status(200).json({ message: "Login successful" });
+      res.status(200).json({
+        message: "Login successful",
+      });
     } catch (error) {
       // sending an error response
       res.status(500).send({ message: error.message });

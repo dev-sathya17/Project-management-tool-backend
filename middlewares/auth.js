@@ -49,7 +49,7 @@ const auth = {
       }
 
       // If user is not admin
-      if (user.role !== "admin") {
+      if (user.role !== "teamLeader") {
         return response
           .status(401)
           .send({ message: "You are not authorized." });
@@ -93,6 +93,30 @@ const auth = {
         message: "an error occured during account activation check",
         error,
       });
+    }
+  },
+
+  // Middleware to check if the user is an admin
+  isAdmin: async (request, response, next) => {
+    try {
+      const userId = request.userId;
+      const user = await User.findById(userId);
+      // If user is not found
+      if (!user) {
+        return response.status(404).send({ message: "User not found" });
+      }
+      // If user is not admin, return an error response
+      if (user.role !== "admin") {
+        return response
+          .status(401)
+          .send({ message: "You are not authorized." });
+      }
+      // If user is admin, call the next middleware
+      next();
+    } catch (error) {
+      response
+        .status(500)
+        .send({ message: "an error occured during admin check", error });
     }
   },
 };
