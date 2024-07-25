@@ -19,7 +19,9 @@ const morgan = require("morgan");
 // Importing the cookie parser library
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./utils/Error");
-const logger = require("./utils/Logger");
+
+// Adding the notification job
+require("./jobs/NotificationJob");
 
 // Creating an express application
 const app = express();
@@ -31,8 +33,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // to log requests
-// app.use(morgan("dev"));
-app.use(logger);
+app.use(morgan("dev"));
 
 // Creating routes
 app.use("/api/v1/users", userRouter);

@@ -10,14 +10,12 @@ const User = require("../models/user");
 // Importing the Task model
 const Task = require("../models/task");
 
-// Importing the transporter for sending emails
-const transporter = require("../utils/transporter");
-
 // Importing the EMAIL_ID from the configuration file
-const { EMAIL_ID, SECRET_KEY } = require("../utils/config");
+const { SECRET_KEY } = require("../utils/config");
 
 // Importing the user helper function to generate an auth string
 const { generateRandomString } = require("../helpers/userHelper");
+const sendEmail = require("../helpers/emailHelper");
 
 const userController = {
   // API for registering users
@@ -55,13 +53,11 @@ const userController = {
       // Saving the user to the database
       await user.save();
 
-      // Sending email
-      transporter.sendMail({
-        from: EMAIL_ID,
-        to: email,
-        subject: "Activate your account",
-        text: `Click here to activate your account: http://localhost:3000/users/activate/${user._id}`,
-      });
+      const subject = "Activate your account";
+      const text = `Click here to activate your account: http://localhost:3000/users/activate/${user._id}`;
+
+      // Sending an email notification
+      sendEmail(email, subject, text);
 
       // Sending a success response
       res.status(201).json({
@@ -180,13 +176,11 @@ const userController = {
       user.authString = authString;
       await user.save();
 
-      // Send email
-      transporter.sendMail({
-        from: EMAIL_ID,
-        to: email,
-        subject: "Password Reset",
-        text: `Click here to reset your password: http://localhost:3000/verify/${authString}`,
-      });
+      const subject = "Reset Password";
+      const message = `Click here to reset your password: http://localhost:3000/reset/${authString}`;
+
+      // Sending an email
+      sendEmail(email, subject, message);
 
       // Sending a success response
       res.status(200).json({
