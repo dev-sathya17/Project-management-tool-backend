@@ -460,6 +460,81 @@ const projectController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to fetch total tasks pending for the day
+  getTotalTasksPendingForToday: async (req, res) => {
+    try {
+      // Getting project id from request params
+      const id = req.params.id;
+
+      // Fetching the project to calculate task status
+      const project = await Project.findById(id).populate("tasks");
+
+      // Check if the project id is existing
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      // Fetching the current date
+      const date = new Date();
+      const today = `${date.getFullYear()}-${
+        parseInt(date.getMonth()) + 1
+      }-${date.getDate()}`;
+      const tomorrow = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate() + 1
+      )
+        .toISOString()
+        .split("T")[0];
+
+      // Fetching all tasks for the current date
+      const tasks = project.tasks.find({
+        dueDate: { $gte: today, $lt: tomorrow },
+      });
+
+      // Counting tasks that are not completed or idle
+      const totalTasksPending = tasks.filter(
+        (task) => task.status !== "completed" && task.status !== "backlog"
+      ).length;
+
+      // Sending a success response with total tasks pending for the day
+      res.json({
+        message: "Total tasks pending for the day fetched successfully",
+        totalTasksPending,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch pending project duration
+  getPendingProjectDuration: async (req, res) => {
+    try {
+      // Getting project id from request params
+      const id = req.params.id;
+
+      // Fetching the project to calculate task status
+      const project = await Project.findById(id).populate("tasks");
+
+      // Check if the project id is existing
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      const duration = calculateDurationInMonths(new Date(), project.endDate);
+
+      // Sending a success response with pending project duration
+      res.json({
+        message: "Pending project duration fetched successfully",
+        duration,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 // Exporting the controller

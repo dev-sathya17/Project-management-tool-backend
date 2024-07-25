@@ -93,5 +93,13 @@ projectRouter.get(
   projectController.getProjectTaskStatus
 );
 
+// Route to get today's pending project task count
+projectRouter.get(
+  "/:id/pending",
+  auth.authenticate,
+  auth.authorize,
+  projectController.getTotalTasksPendingForToday
+);
+
 // Exporting the router
 module.exports = projectRouter;
