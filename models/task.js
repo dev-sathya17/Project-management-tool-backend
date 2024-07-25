@@ -13,7 +13,7 @@ const taskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["idle", "in-progress", "completed"],
+    enum: ["idle", "in-progress", "completed", "backlog"],
     default: "idle",
   },
   deadline: {
