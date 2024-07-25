@@ -75,12 +75,36 @@ userRouter.get(
 );
 
 // Route to fetch team leader's projects
-
 userRouter.get(
   "/projects",
   auth.authenticate,
   auth.authorize,
+  auth.isActivated,
   userController.getTeamLeaderProjects
+);
+
+// Route to fetch user's task progress
+userRouter.get(
+  "/:id/tasks/status",
+  auth.authenticate,
+  auth.isActivated,
+  userController.getTaskStatusCount
+);
+
+// Route to fetch user's tasks pending for the day
+userRouter.get(
+  "/:id/tasks/pending",
+  auth.authenticate,
+  auth.isActivated,
+  userController.getTotalTasksPendingToday
+);
+
+// Route to fetch user's performance percentage
+userRouter.get(
+  "/:id/performance",
+  auth.authenticate,
+  auth.isActivated,
+  userController.getUserPerformancePercentage
 );
 
 // Admin Routes

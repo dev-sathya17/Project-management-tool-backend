@@ -402,6 +402,89 @@ const userController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to fetch task count by status
+  getTaskStatusCount: async (req, res) => {
+    try {
+      // Fetching all tasks from the database
+      const tasks = await Task.find({ assignedTo: req.params.id });
+
+      // Initializing task counts
+      const statusCounts = {
+        idle: 0,
+        "in-progress": 0,
+        completed: 0,
+        backlog: 0,
+      };
+      // Iterating through tasks and updating status counts
+      tasks.forEach((task) => {
+        statusCounts[task.status]++;
+      });
+      // Sending a success response with task counts by status
+      res.json({ message: "Task counts fetched successfully", statusCounts });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch total task count pending for today
+  getTotalTasksPendingToday: async (req, res) => {
+    try {
+      // Fetching all tasks from the database
+      const tasks = await Task.find({ assignedTo: req.params.id });
+
+      // Initializing task count
+      let totalTasksPendingToday = 0;
+
+      // Iterating through tasks and updating total tasks pending for today
+      tasks.forEach((task) => {
+        if (
+          task.deadline.toISOString().slice(0, 10) ===
+            new Date().toISOString().slice(0, 10) &&
+          task.status !== "completed"
+        ) {
+          totalTasksPendingToday++;
+        }
+      });
+
+      // Sending a success response with total tasks pending for today
+      res.json({
+        message: "Total tasks pending for today fetched successfully",
+        totalTasksPendingToday,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to calculate user performance percentage
+  getUserPerformancePercentage: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+      const id = req.userId;
+      // Fetching user's tasks from the database using the user id
+      const tasks = await Task.find({ assignedTo: id });
+      // Initializing variables for calculating performance metrics
+      let totalTasks = tasks.length;
+
+      let completedTasks = tasks.filter(
+        (task) => task.status === "completed"
+      ).length;
+
+      // Calculating performance percentage
+      const performancePercentage = (completedTasks / totalTasks) * 100;
+      // Sending a success response with user performance percentage
+      res.json({
+        message: "User performance percentage fetched successfully",
+        performancePercentage,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = userController;
