@@ -74,12 +74,21 @@ userRouter.get(
   userController.getUserTasks
 );
 
+// Route to fetch team leader's projects
+
+userRouter.get(
+  "/projects",
+  auth.authenticate,
+  auth.authorize,
+  userController.getTeamLeaderProjects
+);
+
 // Admin Routes
 // Fetching all users
 userRouter.get(
   "/admin/users",
   auth.authenticate,
-  auth.authorize,
+  auth.isAdmin,
   userController.getAllUsers
 );
 

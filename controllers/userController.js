@@ -387,6 +387,21 @@ const userController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to fetch all projects of the team leader
+  getTeamLeaderProjects: async (req, res) => {
+    try {
+      // Getting team leader id from request params
+      const id = req.userId;
+      // Fetching the team leader's projects
+      const projects = await Project.find({ owner: id });
+      // Sending a success response with the team leader's projects
+      res.json({ message: "Projects fetched successfully", projects });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = userController;
