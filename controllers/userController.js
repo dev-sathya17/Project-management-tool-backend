@@ -500,6 +500,30 @@ const userController = {
     }
   },
 
+  // API to check authentication
+  checkAuthentication: async (req, res) => {
+    try {
+      const token = req.cookies.token;
+
+      // If token does not exist
+      if (!token) {
+        return res.status(401).json({ message: "Access Denied" });
+      }
+
+      // Verifying the token using JWT
+      try {
+        const verified = jwt.verify(token, SECRET_KEY);
+        res.status(200).json({ message: "Authentication successful" });
+      } catch (error) {
+        // Sending an error response
+        return res.status(401).json({ message: "Invalid token" });
+      }
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   // Admin Functionalities
 
   // API to fetch all users from the database

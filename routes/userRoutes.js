@@ -11,6 +11,10 @@ const files = require("../middlewares/multer");
 // Creating a router
 const userRouter = express.Router();
 
+// Route to verify authentication
+
+userRouter.get("/checkAuth", userController.checkAuthentication);
+
 // Route to register a user
 userRouter.post("/", files.single("image"), userController.register);
 
