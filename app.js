@@ -28,6 +28,12 @@ const cookieParser = require("cookie-parser");
 // Custom error handler middleware
 const errorHandler = require("./utils/Error");
 
+// Adding the notification job
+require("./jobs/NotificationJob");
+
+// Creating an express application
+const app = express();
+
 // Adding the cors middleware to allow cross-origin requests
 app.use(
   cors({
@@ -35,12 +41,6 @@ app.use(
     credentials: true,
   })
 );
-
-// Adding the notification job
-require("./jobs/NotificationJob");
-
-// Creating an express application
-const app = express();
 
 // parse the cookies of the request
 app.use(cookieParser());
