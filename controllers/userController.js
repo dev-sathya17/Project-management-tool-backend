@@ -140,6 +140,7 @@ const userController = {
       // sending a success response
       res.status(200).json({
         message: "Login successful",
+        user,
       });
     } catch (error) {
       // sending an error response
