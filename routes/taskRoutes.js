@@ -71,11 +71,18 @@ taskRouter.get(
   taskController.getTaskCompletionPercentage
 );
 
+// Route to submit a task
+taskRouter.put(
+  "/tasks/:taskId/submit",
+  auth.authenticate,
+  taskController.markTaskAsCompleted
+);
+
 // Admin routes
 
 // API to fetch overall task progress
 taskRouter.get(
-  "/admin/tasks/progress",
+  "/tasks/admin/progress",
   auth.authenticate,
   auth.isAdmin,
   taskController.getOverallTaskProgress

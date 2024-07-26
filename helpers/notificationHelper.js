@@ -1,7 +1,7 @@
 const Task = require("../models/task");
 const Project = require("../models/project");
 const sendEmail = require("../helpers/emailHelper");
-
+const Notification = require("../models/notification");
 // Function to send email notifications for tasks due within the next two days or today.
 const notifyDeadlines = async () => {
   const date = new Date();
@@ -15,32 +15,78 @@ const notifyDeadlines = async () => {
   const todayEnd = new Date(now.setHours(23, 59, 59, 999));
 
   // Fetching all tasks
-  const tasks = await Task.find().populate("assignedTo");
+  const tasks = await Task.find()
+    .populate("assignedTo")
+    .populate("notifications");
 
   // Iterating over tasks and sending email notifications
   tasks.forEach((task) => {
     const timeToDeadline = task.deadline - now;
+
     if (timeToDeadline <= twoDaysFromNow && timeToDeadline > oneDayFromNow) {
-      sendEmail(
-        task.assignedTo.email,
-        "Task Deadline Alert",
-        "Your task is pending in 2 days."
+      const isNotificationSent = task.notifications.filter(
+        (notification) => notification.type === "low"
       );
-      console.log("Email sent for 2 days alert");
+
+      if (!isNotificationSent) {
+        const notification = new Notification({
+          title: "Task Deadline Alert",
+          content: `Your task ${task.title} is due in 2 days.`,
+          createdAt: new Date(),
+          type: "low",
+        });
+        notification.save();
+        task.notifications.push(notification._id);
+        task.save();
+        sendEmail(
+          task.assignedTo.email,
+          "Task Deadline Alert",
+          "Your task is pending in 2 days."
+        );
+        console.log("Email sent for 2 days alert");
+      }
     } else if (timeToDeadline <= oneDayFromNow && timeToDeadline > 0) {
-      sendEmail(
-        task.assignedTo.email,
-        "Task Deadline Alert",
-        "Your task is pending in 1 day."
+      const isNotificationSent = task.notifications.filter(
+        (notification) => notification.type === "medium"
       );
-      console.log("Email sent for 1 day alert");
+      if (!isNotificationSent) {
+        const notification = new Notification({
+          title: "Task Deadline Alert",
+          content: `Your task ${task.title} is due in 1 day.`,
+          createdAt: new Date(),
+          type: "medium",
+        });
+        notification.save();
+        task.notifications.push(notification._id);
+        task.save();
+        sendEmail(
+          task.assignedTo.email,
+          "Task Deadline Alert",
+          "Your task is pending in 1 day."
+        );
+        console.log("Email sent for 1 day alert");
+      }
     } else if (task.deadline >= todayStart && task.deadline <= todayEnd) {
-      sendEmail(
-        task.assignedTo.email,
-        "Task Deadline Alert",
-        "Your task deadline is today."
+      const isNotificationSent = task.notifications.filter(
+        (notification) => notification.type === "high"
       );
-      console.log("Email sent for todays alert");
+      if (!isNotificationSent) {
+        const notification = new Notification({
+          title: "Task Deadline Alert",
+          content: `Your task ${task.title} is due in 1 day.`,
+          createdAt: new Date(),
+          type: "high",
+        });
+        notification.save();
+        task.notifications.push(notification._id);
+        task.save();
+        sendEmail(
+          task.assignedTo.email,
+          "Task Deadline Alert",
+          "Your task deadline is today."
+        );
+        console.log("Email sent for todays alert");
+      }
     } else {
       console.log("No deadline alerts to send for task", task.title);
     }
@@ -61,7 +107,9 @@ const notifyProjectDeadlines = async () => {
   const oneDayFromNow = 24 * 60 * 60 * 1000;
 
   // Fetching all projects
-  const projects = await Project.find().populate("owner");
+  const projects = await Project.find()
+    .populate("owner")
+    .populate("notifications");
 
   // Iterating over projects and sending email notifications
   projects.forEach((project) => {
@@ -72,38 +120,98 @@ const notifyProjectDeadlines = async () => {
       project.endDate >= todayStart &&
       project.endDate <= todayEnd
     ) {
-      sendEmail(
-        project.owner.email,
-        "Project Deadline Alert",
-        "Your project deadline is in 7 days."
+      const isNotificationSent = project.notifications.filter(
+        (notification) => notification.type === "medium"
       );
-      console.log("Email sent for 7 days alert");
+
+      if (!isNotificationSent) {
+        const notification = new Notification({
+          title: "Project Deadline Alert",
+          content: `Your Project ${project.title} is due in 7 days.`,
+          createdAt: new Date(),
+          type: "medium",
+        });
+        notification.save();
+        project.notifications.push(notification._id);
+        project.save();
+        sendEmail(
+          project.owner.email,
+          "Project Deadline Alert",
+          "Your project deadline is in 7 days."
+        );
+        console.log("Email sent for 7 days alert");
+      }
     } else if (
       timeToDeadline <= monthFromNow &&
       timeToDeadline > 0 &&
       project.endDate >= todayStart &&
       project.endDate <= todayEnd
     ) {
-      sendEmail(
-        project.owner.email,
-        "Project Deadline Alert",
-        "Your project deadline is in 30 days."
+      const isNotificationSent = project.notifications.filter(
+        (notification) => notification.type === "low"
       );
-      console.log("Email sent for 30 days alert");
+
+      if (!isNotificationSent) {
+        const notification = new Notification({
+          title: "Project Deadline Alert",
+          content: `Your Project ${project.title} is due in 30 days.`,
+          createdAt: new Date(),
+          type: "low",
+        });
+        notification.save();
+        project.notifications.push(notification._id);
+        project.save();
+        sendEmail(
+          project.owner.email,
+          "Project Deadline Alert",
+          "Your project deadline is in 30 days."
+        );
+        console.log("Email sent for 30 days alert");
+      }
     } else if (timeToDeadline <= oneDayFromNow && timeToDeadline > 0) {
-      sendEmail(
-        project.owner.email,
-        "Project Deadline Alert",
-        "Your Project is pending in 1 day."
+      const isNotificationSent = project.notifications.filter(
+        (notification) => notification.type === "high"
       );
-      console.log("Email sent for 1 day alert");
+
+      if (!isNotificationSent) {
+        const notification = new Notification({
+          title: "Project Deadline Alert",
+          content: `Your Project ${project.title} is due in 1 day.`,
+          createdAt: new Date(),
+          type: "high",
+        });
+        notification.save();
+        project.notifications.push(notification._id);
+        project.save();
+        sendEmail(
+          project.owner.email,
+          "Project Deadline Alert",
+          "Your Project is pending in 1 day."
+        );
+        console.log("Email sent for 1 day alert");
+      }
     } else if (project.endDate >= todayStart && project.endDate <= todayEnd) {
-      sendEmail(
-        project.owner.email,
-        "Project Deadline Alert",
-        "Your Project deadline is today."
+      const isNotificationSent = project.notifications.filter(
+        (notification) => notification.type === "very high"
       );
-      console.log("Email sent for todays alert");
+
+      if (!isNotificationSent) {
+        const notification = new Notification({
+          title: "Project Deadline Alert",
+          content: `Your Project ${project.title} is due today.`,
+          createdAt: new Date(),
+          type: "very high",
+        });
+        notification.save();
+        project.notifications.push(notification._id);
+        project.save();
+        sendEmail(
+          project.owner.email,
+          "Project Deadline Alert",
+          "Your Project deadline is today."
+        );
+        console.log("Email sent for todays alert");
+      }
     } else {
       console.log("No deadline alerts to send for project", project.title);
     }

@@ -281,6 +281,35 @@ const taskController = {
     }
   },
 
+  // API to mark a task as completed
+  markTaskAsCompleted: async (req, res) => {
+    try {
+      // Getting task id from request parameters
+      const taskId = req.params.taskId;
+
+      // Finding and updating the task status to completed in the database using the task id in the request parameters.
+      const task = await Task.findById(taskId);
+      // If task not found, return error response
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      // If task found, update task data
+      task.status = "completed";
+      task.completedOn = new Date().toISOString().split("T")[0];
+
+      await task.save();
+
+      res.json({
+        message: "Task marked as completed successfully",
+        task,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   // Admin Functionalities
 
   // API to fetch task progress by status
@@ -290,10 +319,10 @@ const taskController = {
       const tasks = await Task.find({});
 
       // Initializing counters for each status
-      const completedTasks = 0;
-      const inProgressTasks = 0;
-      const pendingTasks = 0;
-      const overdueTasks = 0;
+      let completedTasks = 0;
+      let inProgressTasks = 0;
+      let pendingTasks = 0;
+      let overdueTasks = 0;
 
       // Iterating through each task to update the counters
       tasks.forEach((task) => {

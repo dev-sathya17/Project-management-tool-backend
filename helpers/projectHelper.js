@@ -37,7 +37,7 @@ function calculateRiskLevel(project) {
     durationRiskPercentage = 0;
 
   if (cost > project.budget) {
-    budgetRiskPercentage = ((cost / project.budget) * 100).toFixed(2);
+    budgetRiskPercentage = ((cost / project.budget) * 100).toFixed(2) || 0;
   }
 
   // Calculating the project duration based risk
@@ -48,7 +48,7 @@ function calculateRiskLevel(project) {
   }).length;
 
   const totalTasks = project.tasks.length;
-  const taskCompletionPercentage = (completedTasks / totalTasks) * 100;
+  const taskCompletionPercentage = (completedTasks / totalTasks) * 100 || 0;
 
   // Calculating remaining duration for the project
   const date = new Date();
@@ -61,22 +61,18 @@ function calculateRiskLevel(project) {
     new Date(project.endDate)
   );
 
-  const durationPercentage = (remainingDuration / project.duration) * 100;
+  const durationPercentage = (remainingDuration / project.duration) * 100 || 0;
 
   if (durationPercentage < taskCompletionPercentage) {
     let difference = (project.duration - remainingDuration).toFixed(2);
-    durationRiskPercentage = (
-      (riskObj.difference / project.duration) *
-      100
-    ).toFixed(2);
+    durationRiskPercentage =
+      ((difference / project.duration) * 100).toFixed(2) || 0;
   }
 
-  const projectRisk = (
-    (durationRiskPercentage + taskCompletionPercentage) /
-    2
-  ).toFixed(2);
+  const projectRisk =
+    ((durationRiskPercentage + taskCompletionPercentage) / 2).toFixed(2) || 0;
 
   return projectRisk;
 }
 
-module.exports = { calculateDurationInMonths };
+module.exports = { calculateDurationInMonths, calculateRiskLevel };

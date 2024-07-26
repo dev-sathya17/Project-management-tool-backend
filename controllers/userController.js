@@ -32,10 +32,6 @@ const userController = {
         role,
       } = req.body;
 
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-
       // Checking if user already exists
       const existingUser = await User.findOne({ email });
 
@@ -460,11 +456,42 @@ const userController = {
       ).length;
 
       // Calculating performance percentage
-      const performancePercentage = (completedTasks / totalTasks) * 100;
+      const performancePercentage = (completedTasks / totalTasks) * 100 || 0;
       // Sending a success response with user performance percentage
       res.json({
         message: "User performance percentage fetched successfully",
         performancePercentage,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch user productivity
+  getUserProductivity: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+
+      const id = req.userId;
+
+      // Fetching user's tasks from the database using the user id
+      const tasks = await Task.find({ assignedTo: id });
+
+      // Fetching count of tasks completed by date
+      const completedTasksByDate = {};
+      tasks.forEach((task) => {
+        const deadlineDate = task.completedOn.toISOString().slice(0, 10);
+        if (completedTasksByDate[deadlineDate]) {
+          completedTasksByDate[deadlineDate]++;
+        } else {
+          completedTasksByDate[deadlineDate] = 1;
+        }
+      });
+
+      res.json({
+        message: "User productivity metrics fetched successfully",
+        completedTasksByDate,
       });
     } catch (error) {
       // Sending an error response

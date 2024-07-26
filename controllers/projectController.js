@@ -1,4 +1,7 @@
-const { calculateDurationInMonths } = require("../helpers/projectHelper");
+const {
+  calculateDurationInMonths,
+  calculateRiskLevel,
+} = require("../helpers/projectHelper");
 
 const Project = require("../models/project");
 const User = require("../models/user");
@@ -45,10 +48,10 @@ const projectController = {
   },
 
   // API to retrieve all projects
-  getAllProjects: async (req, res) => {
+  getAllOwnerProjects: async (req, res) => {
     try {
       // Finding all projects in the database
-      const projects = await Project.find({});
+      const projects = await Project.find({ owner: req.userId });
       // Sending a success response with the fetched projects
       res.json(projects);
     } catch (error) {
@@ -477,31 +480,30 @@ const projectController = {
 
       // Fetching the current date
       const date = new Date();
-      const today = `${date.getFullYear()}-${
-        parseInt(date.getMonth()) + 1
-      }-${date.getDate()}`;
+
+      const today = new Date(
+        `${date.getFullYear()}-${
+          parseInt(date.getMonth()) + 1
+        }-${date.getDate()}`
+      ).toDateString();
+
       const tomorrow = new Date(
         date.getFullYear(),
         date.getMonth(),
         date.getDate() + 1
-      )
-        .toISOString()
-        .split("T")[0];
+      ).toDateString();
 
       // Fetching all tasks for the current date
-      const tasks = project.tasks.find({
-        dueDate: { $gte: today, $lt: tomorrow },
+      const filteredTasks = project.tasks.filter((task) => {
+        return task.deadline.toDateString() === today;
       });
 
-      // Counting tasks that are not completed or idle
-      const totalTasksPending = tasks.filter(
-        (task) => task.status !== "completed" && task.status !== "backlog"
-      ).length;
+      console.log(today, tomorrow);
 
       // Sending a success response with total tasks pending for the day
       res.json({
         message: "Total tasks pending for the day fetched successfully",
-        totalTasksPending,
+        count: filteredTasks.length,
       });
     } catch (error) {
       // Sending an error response
@@ -529,6 +531,46 @@ const projectController = {
       res.json({
         message: "Pending project duration fetched successfully",
         duration,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch project productivity information
+  getProjectProductivity: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const project = await Project.findById(id).populate("tasks");
+
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      // Finding count of tasks completed on each date
+      const productivityData = {};
+      project.tasks.forEach((task) => {
+        const date = new Date(task.completedDate);
+        const dateKey = `${date.getFullYear()}-${
+          parseInt(date.getMonth()) + 1
+        }-${date.getDate()}`;
+        if (!productivityData[dateKey]) {
+          productivityData[dateKey] = 0;
+        } else {
+          productivityData[dateKey]++;
+        }
+      });
+
+      // Sorting productivity data by date
+      const sortedProductivityData = Object.entries(productivityData).sort(
+        (a, b) => new Date(a[0]) - new Date(b[0])
+      );
+
+      // Sending a success response with project productivity information
+      res.json({
+        message: "Project productivity information fetched successfully",
+        productivityData: sortedProductivityData,
       });
     } catch (error) {
       // Sending an error response
@@ -607,7 +649,62 @@ const projectController = {
       // Sending a success response with project with highest risk levels
       res.json({
         message: "Project with highest risk levels fetched successfully",
-        projectWithHighestRiskLevels,
+        project: projectWithHighestRiskLevels
+          ? projectWithHighestRiskLevels
+          : "No project is at risk",
+        highestRiskLevel,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to retrieve all projects
+  getAllProjects: async (req, res) => {
+    try {
+      // Finding all projects in the database
+      const projects = await Project.find({});
+      // Sending a success response with the fetched projects
+      res.json(projects);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to fetch project productivity for all projects information
+  getOverallProjectProductivity: async (req, res) => {
+    try {
+      const project = await Project.find({}).populate("tasks");
+
+      if (!project) {
+        return res.status(404).json({ message: "Project id is invalid" });
+      }
+
+      // Finding count of tasks completed on each date
+      const productivityData = {};
+      project.tasks.forEach((task) => {
+        const date = new Date(task.completedDate);
+        const dateKey = `${date.getFullYear()}-${
+          parseInt(date.getMonth()) + 1
+        }-${date.getDate()}`;
+        if (!productivityData[dateKey]) {
+          productivityData[dateKey] = 0;
+        } else {
+          productivityData[dateKey]++;
+        }
+      });
+
+      // Sorting productivity data by date
+      const sortedProductivityData = Object.entries(productivityData).sort(
+        (a, b) => new Date(a[0]) - new Date(b[0])
+      );
+
+      // Sending a success response with project productivity information
+      res.json({
+        message: "Project productivity information fetched successfully",
+        productivityData: sortedProductivityData,
       });
     } catch (error) {
       // Sending an error response

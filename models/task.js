@@ -30,7 +30,6 @@ const taskSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-
   attachments: [
     {
       type: String,
@@ -47,6 +46,16 @@ const taskSchema = new mongoose.Schema({
     type: String,
     enum: ["low", "medium", "high"],
   },
+  completedOn: {
+    type: Date,
+    default: null,
+  },
+  notifications: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Notification",
+    },
+  ],
 });
 
 // Exporting the Task model for use in other parts of the application

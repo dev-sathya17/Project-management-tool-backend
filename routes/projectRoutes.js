@@ -101,6 +101,20 @@ projectRouter.get(
   projectController.getTotalTasksPendingForToday
 );
 
+// Route to fetch pending project duration
+projectRouter.get(
+  "/:id/pending-duration",
+  auth.authenticate,
+  projectController.getPendingProjectDuration
+);
+
+// Route to fetch the project productivity data
+projectRouter.get(
+  "/:id/productivity",
+  auth.authenticate,
+  projectController.getProjectProductivity
+);
+
 // Admin routes
 
 //Route to get the total sum invested across all projects
@@ -125,6 +139,22 @@ projectRouter.get(
   auth.authenticate,
   auth.isAdmin,
   projectController.getProjectWithHighestRiskLevels
+);
+
+// Route to fetch the project productivity data
+projectRouter.get(
+  "/admin/productivity",
+  auth.authenticate,
+  auth.isAdmin,
+  projectController.getOverallProjectProductivity
+);
+
+// Route to get all projects
+projectRouter.get(
+  "/",
+  auth.authenticate,
+  auth.authorize,
+  projectController.getAllProjects
 );
 
 // Exporting the router
