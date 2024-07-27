@@ -42,6 +42,9 @@ app.use(
   })
 );
 
+// Serving static files from the 'uploads' directory
+app.use("/uploads", express.static("uploads"));
+
 // parse the cookies of the request
 app.use(cookieParser());
 

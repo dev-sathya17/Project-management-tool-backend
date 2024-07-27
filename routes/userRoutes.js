@@ -36,11 +36,7 @@ userRouter.get("/activate/:id", userController.activateUser);
 userRouter.post("/forgot", auth.isActivated, userController.forgotPassword);
 
 // Route for verifying auth string
-userRouter.get(
-  "/verify/:authString",
-  auth.isActivated,
-  userController.authVerify
-);
+userRouter.get("/verify/:authString", userController.authVerify);
 
 // Route for resetting the password
 userRouter.post("/reset", auth.isActivated, userController.resetPassword);

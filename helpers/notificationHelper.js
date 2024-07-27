@@ -225,9 +225,11 @@ const markTaskAsBacklog = async () => {
     status: { $ne: "completed" },
   });
   tasks.forEach((task) => {
-    task.status = "backlog";
-    task.save();
-    console.log("Task marked as backlog:", task.title);
+    if (task.status !== "backlog") {
+      task.status = "backlog";
+      task.save();
+      console.log("Task marked as backlog:", task.title);
+    }
   });
 };
 

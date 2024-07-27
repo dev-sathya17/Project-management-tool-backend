@@ -137,6 +137,14 @@ const userController = {
         expires: new Date(Date.now() + 24 * 3600000), // 24 hours from login
       });
 
+      // Setting user role as cookie
+      res.cookie("role", user.role, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        expires: new Date(Date.now() + 24 * 3600000), // 24 hours from login
+      });
+
       // sending a success response
       res.status(200).json({
         message: "Login successful",
@@ -175,7 +183,6 @@ const userController = {
           .status(404)
           .json({ message: "User with this email does not exist" });
       }
-
       // Generating auth string
       const authString = generateRandomString();
 
@@ -184,7 +191,7 @@ const userController = {
       await user.save();
 
       const subject = "Reset Password";
-      const message = `Click here to reset your password: http://localhost:3000/reset/${authString}`;
+      const message = `Click here to reset your password: http://localhost:3000/verify/${authString}`;
 
       // Sending an email
       sendEmail(email, subject, message);
@@ -504,6 +511,7 @@ const userController = {
   checkAuthentication: async (req, res) => {
     try {
       const token = req.cookies.token;
+      const role = req.cookies.role;
 
       // If token does not exist
       if (!token) {
@@ -513,7 +521,7 @@ const userController = {
       // Verifying the token using JWT
       try {
         const verified = jwt.verify(token, SECRET_KEY);
-        res.status(200).json({ message: "Authentication successful" });
+        res.status(200).json({ message: "Authentication successful", role });
       } catch (error) {
         // Sending an error response
         return res.status(401).json({ message: "Invalid token" });
