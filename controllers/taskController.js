@@ -81,7 +81,8 @@ const taskController = {
   getAllTasksByUserId: async (req, res) => {
     try {
       // Getting user id from request params
-      const userId = req.params.userId;
+      console.log("here");
+      const userId = req.userId;
       // Fetching the user to which the tasks will be fetched
       const user = await User.findById(userId);
       // Check if the user id is existing
@@ -281,11 +282,13 @@ const taskController = {
     }
   },
 
-  // API to mark a task as completed
-  markTaskAsCompleted: async (req, res) => {
+  // API to mark a task's status
+  updateStatus: async (req, res) => {
     try {
       // Getting task id from request parameters
       const taskId = req.params.taskId;
+
+      const { status } = req.body;
 
       // Finding and updating the task status to completed in the database using the task id in the request parameters.
       const task = await Task.findById(taskId);
@@ -295,12 +298,16 @@ const taskController = {
       }
 
       // If task found, update task data
-      task.status = "completed";
-      task.completedOn = new Date().toISOString().split("T")[0];
+      task.status = status || task.status;
+
+      // If status is completed, update completedOn with current date and time.
+      if (status === "completed") {
+        task.completedOn = new Date().toISOString().split("T")[0];
+      }
 
       await task.save();
 
-      res.json({
+      res.status(200).json({
         message: "Task marked as completed successfully",
         task,
       });

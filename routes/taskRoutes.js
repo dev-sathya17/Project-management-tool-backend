@@ -30,11 +30,9 @@ taskRouter.get(
 );
 
 // Route for getting all tasks by user it is assigned to
-
 taskRouter.get(
-  "/tasks/:userId",
+  "/tasks/user-tasks",
   auth.authenticate,
-  auth.authorize,
   taskController.getAllTasksByUserId
 );
 
@@ -71,11 +69,11 @@ taskRouter.get(
   taskController.getTaskCompletionPercentage
 );
 
-// Route to submit a task
+// Route to change status of a task
 taskRouter.put(
-  "/tasks/:taskId/submit",
+  "/tasks/:taskId/status",
   auth.authenticate,
-  taskController.markTaskAsCompleted
+  taskController.updateStatus
 );
 
 // Admin routes

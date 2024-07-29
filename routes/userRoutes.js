@@ -119,7 +119,7 @@ userRouter.get(
 
 // Fetching all users
 userRouter.get(
-  "/admin/users",
+  "/admin",
   auth.authenticate,
   auth.isAdmin,
   userController.getAllUsers
