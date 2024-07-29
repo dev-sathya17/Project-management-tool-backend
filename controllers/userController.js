@@ -10,6 +10,9 @@ const User = require("../models/user");
 // Importing the Task model
 const Task = require("../models/task");
 
+// Importing the Project model
+const Project = require("../models/project");
+
 // Importing the EMAIL_ID from the configuration file
 const { SECRET_KEY } = require("../utils/config");
 
@@ -161,6 +164,7 @@ const userController = {
     try {
       // clearing the cookie
       res.clearCookie("token");
+      res.clearCookie("role");
 
       // sending a success response
       res.status(200).send({ message: "Logged out successfully" });
@@ -384,7 +388,9 @@ const userController = {
       // Getting team leader id from request params
       const id = req.userId;
       // Fetching the team leader's projects
-      const projects = await Project.find({ owner: id });
+      const projects = await Project.find({ owner: id })
+        .populate("members")
+        .populate("tasks");
       // Sending a success response with the team leader's projects
       res.json({ message: "Projects fetched successfully", projects });
     } catch (error) {

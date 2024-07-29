@@ -549,28 +549,34 @@ const projectController = {
       }
 
       // Finding count of tasks completed on each date
-      const productivityData = {};
+      const productivity = {};
       project.tasks.forEach((task) => {
-        const date = new Date(task.completedDate);
-        const dateKey = `${date.getFullYear()}-${
-          parseInt(date.getMonth()) + 1
-        }-${date.getDate()}`;
-        if (!productivityData[dateKey]) {
-          productivityData[dateKey] = 0;
-        } else {
-          productivityData[dateKey]++;
+        if (task.completedOn) {
+          const date = new Date(task.completedOn);
+          const dateKey = `${date.getFullYear()}-${
+            parseInt(date.getMonth()) + 1
+          }-${date.getDate()}`;
+          if (productivity[dateKey]) {
+            productivity[dateKey]++;
+          } else {
+            productivity[dateKey] = 1;
+          }
         }
       });
 
-      // Sorting productivity data by date
-      const sortedProductivityData = Object.entries(productivityData).sort(
-        (a, b) => new Date(a[0]) - new Date(b[0])
-      );
+      const productivityData = [];
+
+      for (const [key, value] of Object.entries(productivity)) {
+        const obj = {};
+        obj["date"] = key;
+        obj["value"] = value;
+        productivityData.push(obj);
+      }
 
       // Sending a success response with project productivity information
       res.json({
         message: "Project productivity information fetched successfully",
-        productivityData: sortedProductivityData,
+        productivityData,
       });
     } catch (error) {
       // Sending an error response
