@@ -133,5 +133,13 @@ userRouter.get(
   userController.getUserTypeCount
 );
 
+// Fetching overall productivity across all users and projects
+userRouter.get(
+  "/admin/overall-productivity",
+  auth.authenticate,
+  auth.isAdmin,
+  userController.getOverallProductivity
+);
+
 // Exporting the router
 module.exports = userRouter;

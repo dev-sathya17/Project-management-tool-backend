@@ -607,6 +607,49 @@ const userController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  getOverallProductivity: async (req, res) => {
+    try {
+      // Fetching tasks from the database using the user id
+      const tasks = await Task.find();
+      console.log(req);
+
+      // Fetching count of tasks completed by date
+      const completedTasksByDate = {};
+      tasks.forEach((task) => {
+        if (task.completedOn) {
+          const date = new Date(task.completedOn);
+          const dateKey = `${date.getFullYear()}-${
+            parseInt(date.getMonth()) + 1
+          }-${date.getDate()}`;
+          if (completedTasksByDate[dateKey]) {
+            completedTasksByDate[dateKey]++;
+          } else {
+            completedTasksByDate[dateKey] = 1;
+          }
+        }
+      });
+
+      console.log(completedTasksByDate);
+
+      const productivityData = [];
+
+      for (const [key, value] of Object.entries(completedTasksByDate)) {
+        const obj = {};
+        obj["date"] = key;
+        obj["value"] = value;
+        productivityData.push(obj);
+      }
+
+      res.json({
+        message: "User productivity metrics fetched successfully",
+        productivityData,
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = userController;

@@ -624,11 +624,28 @@ const projectController = {
       projects.forEach((project) => {
         projectStatusCount[project.status]++;
       });
+      const progressData = [];
+      for (let key in projectStatusCount) {
+        const obj = {};
+        if (key === "active") {
+          obj["name"] = "Active";
+          obj["value"] = projectStatusCount[key];
+          progressData.push(obj);
+        } else if (key === "inactive") {
+          obj["name"] = "Inactive";
+          obj["value"] = projectStatusCount[key];
+          progressData.push(obj);
+        } else if (key === "completed") {
+          obj["name"] = "Completed";
+          obj["value"] = projectStatusCount[key];
+          progressData.push(obj);
+        }
+      }
 
       // Sending a success response with project status count
       res.json({
         message: "Project status count fetched successfully",
-        projectStatusCount,
+        progressData,
       });
     } catch (error) {
       // Sending an error response
@@ -673,45 +690,6 @@ const projectController = {
       const projects = await Project.find({});
       // Sending a success response with the fetched projects
       res.json(projects);
-    } catch (error) {
-      // Sending an error response
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  // API to fetch project productivity for all projects information
-  getOverallProjectProductivity: async (req, res) => {
-    try {
-      const project = await Project.find({}).populate("tasks");
-
-      if (!project) {
-        return res.status(404).json({ message: "Project id is invalid" });
-      }
-
-      // Finding count of tasks completed on each date
-      const productivityData = {};
-      project.tasks.forEach((task) => {
-        const date = new Date(task.completedDate);
-        const dateKey = `${date.getFullYear()}-${
-          parseInt(date.getMonth()) + 1
-        }-${date.getDate()}`;
-        if (!productivityData[dateKey]) {
-          productivityData[dateKey] = 0;
-        } else {
-          productivityData[dateKey]++;
-        }
-      });
-
-      // Sorting productivity data by date
-      const sortedProductivityData = Object.entries(productivityData).sort(
-        (a, b) => new Date(a[0]) - new Date(b[0])
-      );
-
-      // Sending a success response with project productivity information
-      res.json({
-        message: "Project productivity information fetched successfully",
-        productivityData: sortedProductivityData,
-      });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

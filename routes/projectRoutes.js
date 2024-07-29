@@ -141,14 +141,6 @@ projectRouter.get(
   projectController.getProjectWithHighestRiskLevels
 );
 
-// Route to fetch the project productivity data
-projectRouter.get(
-  "/admin/productivity",
-  auth.authenticate,
-  auth.isAdmin,
-  projectController.getOverallProjectProductivity
-);
-
 // Route to get all projects
 projectRouter.get(
   "/",
