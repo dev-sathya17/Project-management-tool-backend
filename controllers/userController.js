@@ -407,14 +407,23 @@ const userController = {
 
       // Initializing task counts
       const statusCounts = {
-        idle: 0,
-        "in-progress": 0,
-        completed: 0,
-        backlog: 0,
+        Idle: 0,
+        Pending: 0,
+        Completed: 0,
+        Backlogs: 0,
       };
       // Iterating through tasks and updating status counts
       tasks.forEach((task) => {
-        statusCounts[task.status]++;
+        console.log(task.status);
+        if (task.status === "completed") {
+          statusCounts.Completed++;
+        } else if (task.status === "backlog") {
+          statusCounts.Backlogs++;
+        } else if (task.status === "in-progress") {
+          statusCounts.Pending++;
+        } else if (task.status === "idle") {
+          statusCounts.Idle++;
+        }
       });
       // Sending a success response with task counts by status
       res.json({ message: "Task counts fetched successfully", statusCounts });
@@ -495,17 +504,31 @@ const userController = {
       // Fetching count of tasks completed by date
       const completedTasksByDate = {};
       tasks.forEach((task) => {
-        const deadlineDate = task.completedOn.toISOString().slice(0, 10);
-        if (completedTasksByDate[deadlineDate]) {
-          completedTasksByDate[deadlineDate]++;
-        } else {
-          completedTasksByDate[deadlineDate] = 1;
+        if (task.completedOn) {
+          const date = new Date(task.completedOn);
+          const dateKey = `${date.getFullYear()}-${
+            parseInt(date.getMonth()) + 1
+          }-${date.getDate()}`;
+          if (completedTasksByDate[dateKey]) {
+            completedTasksByDate[dateKey]++;
+          } else {
+            completedTasksByDate[dateKey] = 1;
+          }
         }
       });
 
+      const productivityData = [];
+
+      for (const [key, value] of Object.entries(completedTasksByDate)) {
+        const obj = {};
+        obj["date"] = key;
+        obj["value"] = value;
+        productivityData.push(obj);
+      }
+
       res.json({
         message: "User productivity metrics fetched successfully",
-        completedTasksByDate,
+        productivityData,
       });
     } catch (error) {
       // Sending an error response

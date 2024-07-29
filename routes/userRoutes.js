@@ -107,6 +107,14 @@ userRouter.get(
   userController.getUserPerformancePercentage
 );
 
+// Route to fetch user's productivity
+userRouter.get(
+  "/:id/productivity",
+  auth.authenticate,
+  auth.isActivated,
+  userController.getUserProductivity
+);
+
 // Admin Routes
 
 // Fetching all users

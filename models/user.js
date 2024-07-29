@@ -45,6 +45,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "avatar.png",
   },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+    required: true,
+    default: null,
+  },
 });
 
 // Exporting the User model for use in other parts of the application
