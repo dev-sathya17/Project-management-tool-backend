@@ -34,7 +34,7 @@ const app = express();
 // Adding the cors middleware to allow cross-origin requests
 app.use(
   cors({
-    origin: "https://pro-manager-tool.netlify.app/",
+    origin: "https://pro-manager-tool.netlify.app",
     credentials: true,
   })
 );
