@@ -61,7 +61,7 @@ const userController = {
       await user.save();
 
       const subject = "Activate your account";
-      const text = `Click here to activate your account: http://localhost:3000/users/activate/${user._id}`;
+      const text = `Click here to activate your account: https://pro-manager-tool.netlify.app/users/activate/${user._id}`;
 
       // Sending an email notification
       sendEmail(email, subject, text);
@@ -195,7 +195,7 @@ const userController = {
       await user.save();
 
       const subject = "Reset Password";
-      const message = `Click here to reset your password: http://localhost:3000/verify/${authString}`;
+      const message = `Click here to reset your password: https://pro-manager-tool.netlify.app/verify/${authString}`;
 
       // Sending an email
       sendEmail(email, subject, message);
@@ -310,7 +310,7 @@ const userController = {
       user.mobile = mobile || user.mobile;
       user.image = req.file ? req.file.path : user.image;
 
-      console.log(req.file.path);
+      console.log(user.image);
 
       // Saving info to the database
       const updatedUser = await user.save();
