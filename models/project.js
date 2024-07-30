@@ -49,18 +49,6 @@ const projectSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  attachments: [
-    {
-      type: String,
-      default: "",
-    },
-  ],
-  notifications: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Notification",
-    },
-  ],
 });
 
 // Exporting the Project model for use in other parts of the application

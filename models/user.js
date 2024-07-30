@@ -51,6 +51,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: null,
   },
+  task: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Task",
+    default: null,
+  },
 });
 
 // Exporting the User model for use in other parts of the application

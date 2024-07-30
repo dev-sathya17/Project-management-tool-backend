@@ -29,6 +29,9 @@ projectRouter.get(
 );
 
 // Route to get a specific project
+projectRouter.get("/team", auth.authenticate, projectController.getTeam);
+
+// Route to get a specific project
 projectRouter.get(
   "/:id",
   auth.authenticate,
@@ -143,9 +146,9 @@ projectRouter.get(
 
 // Route to get all projects
 projectRouter.get(
-  "/",
+  "/admin/all",
   auth.authenticate,
-  auth.authorize,
+  auth.isAdmin,
   projectController.getAllProjects
 );
 

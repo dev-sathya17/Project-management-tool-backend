@@ -49,13 +49,13 @@ const auth = {
       }
 
       // If user is not admin
-      if (user.role !== "teamLeader") {
+      if (user.role !== "teamLeader" && user.role !== "admin") {
         return response
           .status(401)
           .send({ message: "You are not authorized." });
       }
 
-      // If user is admin, call the next middleware
+      // call the next middleware
       next();
     } catch (error) {
       response

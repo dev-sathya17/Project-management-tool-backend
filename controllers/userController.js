@@ -310,6 +310,8 @@ const userController = {
       user.mobile = mobile || user.mobile;
       user.image = req.file ? req.file.path : user.image;
 
+      console.log(req.file.path);
+
       // Saving info to the database
       const updatedUser = await user.save();
 
@@ -340,6 +342,37 @@ const userController = {
 
       // returning success response, if user is deleted
       res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // Fetch unassigned users
+  getUnassignedUsers: async (req, res) => {
+    try {
+      // Fetching all users from the database
+      const users = await User.find({ role: "employee" });
+      // Filtering out users who are already assigned to a task
+      const unassignedUsers = users.filter((user) => !user.assignedTo);
+      // Returning the fetched users
+      res.json(unassignedUsers);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // Get task unassigned users
+  getTaskUnassignedUsers: async (req, res) => {
+    try {
+      // Fetching user tasks from the database using the user id
+      const users = await User.find({ role: "employee" });
+
+      const unassignedUsers = users.filter((user) => user.task === null);
+
+      // Returning the fetched users
+      res.json(unassignedUsers);
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });
@@ -390,7 +423,20 @@ const userController = {
       // Fetching the team leader's projects
       const projects = await Project.find({ owner: id })
         .populate("members")
-        .populate("tasks");
+        .populate({
+          path: "tasks",
+          populate: [
+            {
+              path: "subTasks",
+              model: "SubTask",
+            },
+            {
+              path: "assignedTo",
+              model: "User",
+            },
+          ],
+        });
+      console.log(projects[0]);
       // Sending a success response with the team leader's projects
       res.json({ message: "Projects fetched successfully", projects });
     } catch (error) {
@@ -612,7 +658,6 @@ const userController = {
     try {
       // Fetching tasks from the database using the user id
       const tasks = await Task.find();
-      console.log(req);
 
       // Fetching count of tasks completed by date
       const completedTasksByDate = {};

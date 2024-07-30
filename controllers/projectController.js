@@ -33,7 +33,6 @@ const projectController = {
         budget,
         duration,
         owner: req.userId,
-        attachments: req.files ? req.files.map((file) => file.path) : [],
       });
 
       // Saving the project to the database
@@ -64,7 +63,21 @@ const projectController = {
   getProjectById: async (req, res) => {
     try {
       // Finding the project by its ID in the database
-      const project = await Project.findById(req.params.id);
+      const project = await Project.findById(req.params.id)
+        .populate("members")
+        .populate({
+          path: "tasks",
+          populate: [
+            {
+              path: "subTasks",
+              model: "SubTask",
+            },
+            {
+              path: "assignedTo",
+              model: "User",
+            },
+          ],
+        });
       // Sending a success response with the fetched project
       res.json(project);
     } catch (error) {
@@ -77,8 +90,15 @@ const projectController = {
   updateProject: async (req, res) => {
     try {
       // Extracting the values from the request body
-      const { title, description, startDate, endDate, members, budget } =
-        req.body;
+      const {
+        title,
+        description,
+        startDate,
+        endDate,
+        members,
+        budget,
+        status,
+      } = req.body;
       const duration = calculateDurationInMonths(
         new Date(startDate),
         new Date(endDate)
@@ -98,6 +118,7 @@ const projectController = {
       project.endDate = endDate ? new Date(endDate) : project.endDate;
       project.budget = budget || project.budget;
       project.duration = duration || project.duration;
+      project.status = status || project.status;
 
       if (members) {
         members.forEach((member) => {
@@ -109,10 +130,9 @@ const projectController = {
             return res.status(404).json({ error: "User not found" });
           }
 
-          // If user does not exist in the project's members array, add them
-          if (!project.members.includes(member)) {
-            project.members.push(member);
-          }
+          // add them to the project's members array
+          project.members.push(member);
+          user.assignedTo = project._id;
         });
       }
 
@@ -584,6 +604,32 @@ const projectController = {
     }
   },
 
+  getTeam: async (req, res) => {
+    try {
+      const userId = req.userId;
+
+      // Fetching user information
+      const user = await User.findById(userId);
+
+      const id = user.assignedTo;
+
+      const project = await Project.findById(id).populate("members");
+
+      const team = project.members;
+
+      console.log(team);
+
+      // Sending a success response with team members
+      res.json({
+        message: "Team members fetched successfully",
+        team,
+      });
+    } catch (error) {
+      // sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   //Admin Functionalities
 
   // API to fetch total sum invested across all projects
@@ -687,9 +733,23 @@ const projectController = {
   getAllProjects: async (req, res) => {
     try {
       // Finding all projects in the database
-      const projects = await Project.find({});
+      const projects = await Project.find({})
+        .populate("members")
+        .populate({
+          path: "tasks",
+          populate: [
+            {
+              path: "subTasks",
+              model: "SubTask",
+            },
+            {
+              path: "assignedTo",
+              model: "User",
+            },
+          ],
+        });
       // Sending a success response with the fetched projects
-      res.json(projects);
+      res.json({ message: "Projects fetched successfully", projects });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

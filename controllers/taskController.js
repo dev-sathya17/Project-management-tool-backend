@@ -19,7 +19,21 @@ const taskController = {
       const projectId = req.params.projectId;
 
       // Fetching the project to which the task will be added
-      const project = await Project.findById(projectId);
+      const project = await Project.findById(projectId)
+        .populate("members")
+        .populate({
+          path: "tasks",
+          populate: [
+            {
+              path: "subTasks",
+              model: "SubTask",
+            },
+            {
+              path: "assignedTo",
+              model: "User",
+            },
+          ],
+        });
 
       // Check if the project id is existing
       if (!project) {
@@ -51,7 +65,9 @@ const taskController = {
       await project.save();
 
       // Sending a success response with the created task
-      res.status(201).json({ message: "Task created successfully", newTask });
+      res
+        .status(201)
+        .json({ message: "Task created successfully", project, newTask });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

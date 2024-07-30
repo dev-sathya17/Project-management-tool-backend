@@ -66,6 +66,23 @@ userRouter.delete(
   userController.deleteUser
 );
 
+// Route to fetch unassigned users
+userRouter.get(
+  "/unassigned",
+  auth.authenticate,
+  auth.isActivated,
+  userController.getUnassignedUsers
+);
+
+// Route to get task unassigned users
+userRouter.get(
+  "/unassigned/tasks",
+  auth.authenticate,
+  auth.isActivated,
+  auth.authorize,
+  userController.getTaskUnassignedUsers
+);
+
 // Route to fetch user task details
 userRouter.get(
   "/tasks",

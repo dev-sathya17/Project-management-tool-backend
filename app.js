@@ -13,9 +13,6 @@ const taskRouter = require("./routes/taskRoutes");
 // Importing the sub tasks router
 const subTaskRouter = require("./routes/subTaskRoutes");
 
-// Importing the notification router
-const notificationRouter = require("./routes/notificationRoutes");
-
 // Importing the morgan library to log requests
 const morgan = require("morgan");
 
@@ -59,7 +56,6 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/projects", projectRouter);
 app.use("/api/v1/projects", taskRouter);
 app.use("/api/v1/tasks", subTaskRouter);
-app.use("/api/v1/notifications", notificationRouter);
 
 // Handle 404 error
 app.use(errorHandler);
