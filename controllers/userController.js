@@ -61,7 +61,7 @@ const userController = {
       await user.save();
 
       const subject = "Activate your account";
-      const text = `Click here to activate your account: https://pro-manager-tool.netlify.app/users/activate/${user._id}`;
+      const text = `Click here to activate your account: https://pro-manager-tool.netlify.app/activate/${user._id}`;
 
       // Sending an email notification
       sendEmail(email, subject, text);
