@@ -48,7 +48,6 @@ const userSchema = new mongoose.Schema({
   assignedTo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Project",
-    required: true,
     default: null,
   },
   task: {

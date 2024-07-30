@@ -180,6 +180,8 @@ const userController = {
       // Extracting values from request body
       const { email } = req.body;
 
+      console.log(email);
+
       // Checking if this email is of a valid user
       const user = await User.findOne({ email });
       if (!user) {
@@ -187,6 +189,8 @@ const userController = {
           .status(404)
           .json({ message: "User with this email does not exist" });
       }
+
+      console.log(user);
       // Generating auth string
       const authString = generateRandomString();
 
@@ -296,6 +300,8 @@ const userController = {
       const { firstName, lastName, salaryPerMonth, email, mobile } = req.body;
 
       const user = await User.findById(id);
+
+      console.log(req.file);
 
       // If user not found, return error response
       if (!user) {

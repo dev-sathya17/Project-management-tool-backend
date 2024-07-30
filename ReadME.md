@@ -87,3 +87,10 @@ EMAIL_SERVICE=your_email_service
 EMAIL_USER=your_email_user
 EMAIL_PASS=your_email_password
 ```
+
+### To have a walkthrough into Pro-Manager
+
+#### Here are admin credentials
+
+> - vsvs2209@gmail.com
+> - password: Abcd@1234
