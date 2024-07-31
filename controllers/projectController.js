@@ -12,7 +12,7 @@ const projectController = {
   createProject: async (req, res) => {
     try {
       // destructuring the request body
-      const { title, description, startDate, endDate, members, budget } =
+      const { title, description, startDate, endDate, member, budget } =
         req.body;
 
       const duration = calculateDurationInMonths(
@@ -26,7 +26,7 @@ const projectController = {
         description,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
-        members,
+        member,
         budget,
         duration,
         owner: req.userId,
@@ -35,19 +35,16 @@ const projectController = {
       // Saving the project to the database
       await project.save();
 
-      members.forEach(async (member) => {
-        // Finding the user by their ID in the database
-        const user = await User.findById(member);
+      const user = await User.findById(member);
 
-        // If user not found, return error response
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
-        }
+      // If user not found, return error response
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-        user.assignedTo = project._id;
+      user.assignedTo = project._id;
 
-        await user.save();
-      });
+      await user.save();
 
       // Sending a success response with the created project
       res.status(201).json({ message: "Project created successfully" });
