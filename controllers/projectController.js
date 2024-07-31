@@ -26,7 +26,7 @@ const projectController = {
         description,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
-        member,
+        members: [member],
         budget,
         duration,
         owner: req.userId,
