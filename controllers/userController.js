@@ -138,6 +138,7 @@ const userController = {
         secure: true,
         sameSite: "none",
         expires: new Date(Date.now() + 24 * 3600000), // 24 hours from login
+        path: "/",
       });
 
       // Setting user role as cookie
@@ -146,6 +147,7 @@ const userController = {
         secure: true,
         sameSite: "none",
         expires: new Date(Date.now() + 24 * 3600000), // 24 hours from login
+        path: "/",
       });
 
       // sending a success response
@@ -162,9 +164,25 @@ const userController = {
   // API for user logout
   logout: async (req, res) => {
     try {
+      const userId = req.userId;
+
+      if (!userId) {
+        return res.status(400).send({ message: "User not authenticated" });
+      }
+
       // clearing the cookie
-      res.clearCookie("token");
-      res.clearCookie("role");
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+      });
+      res.clearCookie("role", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+      });
 
       // sending a success response
       res.status(200).send({ message: "Logged out successfully" });
