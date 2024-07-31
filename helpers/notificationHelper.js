@@ -14,7 +14,10 @@ const notifyDeadlines = async () => {
   const todayEnd = new Date(now.setHours(23, 59, 59, 999));
 
   // Fetching all tasks
-  const tasks = await Task.find().populate("assignedTo");
+  const tasks = await Task.find().populate({
+    path: "assignedTo",
+    model: "User",
+  });
 
   // Iterating over tasks and sending email notifications
   tasks.forEach((task) => {
@@ -112,12 +115,20 @@ const notifyProjectDeadlines = async () => {
 
 // Function to update task as backlog once deadline is reached and task is not completed
 const markTaskAsBacklog = async () => {
+  const date = new Date();
+  const currentDate = `${date.getFullYear()}-${
+    parseInt(date.getMonth()) + 1
+  }-${date.getDate()}`;
+  const now = new Date(currentDate);
+  const todayStart = new Date(now.setHours(0, 0, 0, 0));
+
   const tasks = await Task.find({
-    deadline: { $lte: new Date() },
     status: { $ne: "completed" },
   });
+
   tasks.forEach((task) => {
-    if (task.status !== "backlog") {
+    console.log(todayStart, task.deadline);
+    if (task.deadline < todayStart) {
       task.status = "backlog";
       task.save();
       console.log("Task marked as backlog:", task.title);

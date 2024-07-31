@@ -6,7 +6,7 @@ const {
 } = require("../helpers/notificationHelper");
 
 // Schedule the job to run every hour
-cron.schedule("0 * * * *", () => {
+cron.schedule("10 * * * * *", () => {
   console.log("Checking task deadlines...");
   notifyDeadlines();
   notifyProjectDeadlines();

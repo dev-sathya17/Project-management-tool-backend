@@ -55,10 +55,12 @@ const taskController = {
         deadline: new Date(deadline),
         priority,
         assignedTo: assignedUser._id,
-        attachments: req.files ? req.files.map((file) => file.path) : [],
       });
 
+      assignedUser.task = newTask._id;
+
       await newTask.save();
+      await assignedUser.save();
 
       // Add the new task to the project
       project.tasks.push(newTask._id);
@@ -133,6 +135,8 @@ const taskController = {
         return res.status(404).json({ message: "Task id is invalid" });
       }
 
+      const oldUser = User.find({ _id: task.assignedTo });
+
       // Updating the task properties
       task.title = title || task.title;
       task.description = description || task.description;
@@ -143,9 +147,13 @@ const taskController = {
         ? await User.findById(assignedTo)
         : task.assignedTo;
 
-      if (req.files) {
-        const updatedFiles = req.files.map((file) => file.path);
-        task.attachments.push(...updatedFiles);
+      if (assignedTo) {
+        const newUser = User.find({ _id: assignedTo });
+        newUser.task = task._id;
+        await newUser.save();
+
+        oldUser.task = null;
+        await oldUser.save();
       }
 
       await task.save();
@@ -172,94 +180,20 @@ const taskController = {
         return res.status(404).json({ message: "Task id is invalid" });
       }
 
-      if (task.attachments.length === 0) {
-        await task.deleteOne({ _id: taskId });
-        return res.json({ message: "Task deleted successfully" });
-      }
+      // Deleting the task from the database
+      await task.deleteOne({ _id: taskId });
 
-      // Flag variable to delete project only after files are removed
-      let isFilesDeleted = false;
-
-      // Deleting associated attachments from the directory
-      task.attachments.forEach((attachment) => {
-        const [folder, filename] = attachment.split("\\");
-        const filePath = path.join(folder, filename);
-        try {
-          fs.unlinkSync(filePath);
-          console.log(`Deleted file: ${filePath}`);
-          isFilesDeleted = true;
-        } catch (err) {
-          console.error(`Error deleting file: ${filePath}`, err);
-          isFilesDeleted = false;
-          res.status(500).json({
-            message: "There was an error with deleting attachments of the task",
-          });
-        }
-      });
-
-      // Deleting the task from the database after file deletion
-      if (isFilesDeleted) {
-        await task.deleteOne({ _id: taskId });
-
-        // Removing the task from the project
-        await Project.findByIdAndUpdate(
-          req.params.projectId,
-          { $pull: { tasks: taskId } },
-          { new: true }
-        );
-
-        // Sending a success response
-        res.json({ message: "Task deleted successfully" });
-      } else {
-        res.status(500).json({
-          message: "There was an error with deleting attachments of the task",
-        });
-      }
-      // Sending a success response
-    } catch (error) {
-      // Sending an error response
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  // API to remove attachments from the task
-  removeAttachments: async (req, res) => {
-    try {
-      // Getting task id from request params
-      const taskId = req.params.taskId;
-
-      // Getting the attachments to be removed from the request body
-      const filename = req.params.filename;
-
-      // Fetching the task to which the attachments will be removed
-      const task = await Task.findById(taskId);
-
-      // Check if the task id is existing
-      if (!task) {
-        return res.status(404).json({ message: "Task id is invalid" });
-      }
-
-      // Deleting the specified attachments from the directory
-      const filePath = path.join("uploads", filename);
-      try {
-        fs.unlinkSync(filePath);
-        console.log(`Deleted file: ${filePath}`);
-      } catch (err) {
-        console.error(`Error deleting file: ${filePath}`, err);
-        res
-          .status(500)
-          .json({ message: "There was an error with deleting attachments" });
-      }
-
-      // Removing the specified attachments from the task
-      task.attachments = task.attachments.filter(
-        (attachment) => attachment.split("\\")[1] !== filename
+      // Removing the task from the project
+      await Project.findByIdAndUpdate(
+        req.params.projectId,
+        { $pull: { tasks: taskId } },
+        { new: true }
       );
 
-      // Saving the updated task to the database
-      await task.save();
-      // Sending a success response with the updated task
-      res.json({ message: "Attachments removed successfully", task });
+      // Sending a success response
+      res.json({ message: "Task deleted successfully" });
+
+      // Sending a success response
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

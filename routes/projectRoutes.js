@@ -16,7 +16,6 @@ projectRouter.post(
   "/",
   auth.authenticate,
   auth.authorize,
-  files.array("attachments"),
   projectController.createProject
 );
 
@@ -44,7 +43,6 @@ projectRouter.put(
   "/:id",
   auth.authenticate,
   auth.authorize,
-  files.array("attachments"),
   projectController.updateProject
 );
 
@@ -54,14 +52,6 @@ projectRouter.delete(
   auth.authenticate,
   auth.authorize,
   projectController.deleteProject
-);
-
-// Route to remove attachments from a project
-projectRouter.delete(
-  "/:id/attachments/:filename",
-  auth.authenticate,
-  auth.authorize,
-  projectController.removeAttachments
 );
 
 // Route to remove members from a project

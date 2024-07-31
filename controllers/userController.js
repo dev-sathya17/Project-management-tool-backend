@@ -296,12 +296,12 @@ const userController = {
   updateProfile: async (req, res) => {
     try {
       // Getting user id from request parameters
-      const id = req.userId;
+      const { id } = req.params;
       const { firstName, lastName, salaryPerMonth, email, mobile } = req.body;
 
       const user = await User.findById(id);
 
-      console.log(req.file);
+      console.log(user);
 
       // If user not found, return error response
       if (!user) {
@@ -315,8 +315,6 @@ const userController = {
       user.email = email || user.email;
       user.mobile = mobile || user.mobile;
       user.image = req.file ? req.file.path : user.image;
-
-      console.log(user.image);
 
       // Saving info to the database
       const updatedUser = await user.save();
@@ -333,7 +331,7 @@ const userController = {
   deleteUser: async (req, res) => {
     try {
       // Getting user id from request parameters
-      const id = req.userId;
+      const { id } = req.params;
 
       // Finding and deleting the user from the database using the id in the request parameters.
       const user = await User.findByIdAndDelete(id);
@@ -621,8 +619,10 @@ const userController = {
       // Fetching all users from the database
       const users = await User.find();
 
+      const data = users.filter((user) => user.role !== "admin");
+
       // Returning the fetched users
-      res.json(users);
+      res.json({ allUsers: data });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

@@ -51,7 +51,7 @@ userRouter.get(
 
 // Route for updating user profile
 userRouter.put(
-  "/",
+  "/:id",
   auth.authenticate,
   auth.isActivated,
   files.single("image"),
@@ -60,7 +60,7 @@ userRouter.put(
 
 // Route for deleting user
 userRouter.delete(
-  "/",
+  "/:id",
   auth.authenticate,
   auth.isActivated,
   userController.deleteUser

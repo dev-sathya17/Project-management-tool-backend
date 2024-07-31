@@ -6,9 +6,6 @@ const {
 const Project = require("../models/project");
 const User = require("../models/user");
 
-const fs = require("fs");
-const path = require("path");
-
 // Creating a controller object
 const projectController = {
   // API to create a new project
@@ -37,6 +34,20 @@ const projectController = {
 
       // Saving the project to the database
       await project.save();
+
+      members.forEach(async (member) => {
+        // Finding the user by their ID in the database
+        const user = await User.findById(member);
+
+        // If user not found, return error response
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        user.assignedTo = project._id;
+
+        await user.save();
+      });
 
       // Sending a success response with the created project
       res.status(201).json({ message: "Project created successfully" });
@@ -120,29 +131,37 @@ const projectController = {
       project.duration = duration || project.duration;
       project.status = status || project.status;
 
-      if (members) {
-        members.forEach((member) => {
-          // Fetch user object using id value in member
-          const user = User.findById(member);
-
-          // Check if user exists
-          if (!user) {
-            return res.status(404).json({ error: "User not found" });
-          }
-
-          // add them to the project's members array
-          project.members.push(member);
-          user.assignedTo = project._id;
-        });
-      }
-
-      if (req.files) {
-        const updatedFiles = req.files.map((file) => file.path);
-        project.attachments.push(...updatedFiles);
-      }
-
       // Updating the project in the database
       const updatedProject = await project.save();
+
+      if (members) {
+        members.forEach(async (member) => {
+          try {
+            // Fetch user object using id value in member
+            const user = await User.findById(member);
+
+            // Check if user exists
+            if (!user) {
+              return res.status(404).json({ error: "User not found" });
+            }
+
+            console.log(user);
+
+            // add them to the project's members array
+            project.members.push(member);
+
+            user.assignedTo = project._id;
+
+            // Save the user object with updated assignedTo value
+            await user.save();
+            await project.save();
+          } catch (err) {
+            return res
+              .status(500)
+              .json({ error: "An error occurred while updating the user" });
+          }
+        });
+      }
 
       // Sending a success response with the updated project
       res.json({ message: "Project updated successfully", updatedProject });
@@ -158,88 +177,10 @@ const projectController = {
       // Finding the project by its ID in the database
       const project = await Project.findById(req.params.id);
 
-      // If project has no files, then deleting directly
-      if (project.attachments.length === 0) {
-        await project.deleteOne({ _id: req.params.id });
-        return res.json({ message: "Project deleted successfully" });
-      }
-
-      // Flag variable to delete project only after files are removed
-      let isFilesDeleted = false;
-
-      // Deleting associated attachments from the directory
-      project.attachments.forEach((attachment) => {
-        const [folder, filename] = attachment.split("\\");
-        const filePath = path.join(folder, filename);
-        try {
-          fs.unlinkSync(filePath);
-          console.log(`Deleted file: ${filePath}`);
-          isFilesDeleted = true;
-        } catch (err) {
-          console.error(`Error deleting file: ${filePath}`, err);
-          isFilesDeleted = false;
-          res.status(500).json({
-            message:
-              "There was an error with deleting attachments of the project",
-          });
-        }
-      });
-
       // Deleting the project from the database after file deletion
-      if (isFilesDeleted) {
-        await project.deleteOne({ _id: req.params.id });
-        // Sending a success response
-        res.json({ message: "Project deleted successfully" });
-      } else {
-        res.status(500).json({
-          message:
-            "There was an error with deleting attachments of the project",
-        });
-      }
-    } catch (error) {
-      // Sending an error response
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  // API to remove attachments from the project
-  removeAttachments: async (req, res) => {
-    try {
-      // Getting project id from request params
-      const id = req.params.id;
-
-      // Getting the attachments to be removed from the request body
-      const filename = req.params.filename;
-
-      // Fetching the project to which the attachments will be removed
-      const project = await Project.findById(id);
-
-      // Check if the project id is existing
-      if (!project) {
-        return res.status(404).json({ message: "Project id is invalid" });
-      }
-
-      // Deleting the specified attachments from the directory
-      const filePath = path.join("uploads", filename);
-      try {
-        fs.unlinkSync(filePath);
-        console.log(`Deleted file: ${filePath}`);
-      } catch (err) {
-        console.error(`Error deleting file: ${filePath}`, err);
-        res
-          .status(500)
-          .json({ message: "There was an error with deleting attachments" });
-      }
-
-      // Removing the specified attachments from the project
-      project.attachments = project.attachments.filter(
-        (attachment) => attachment.split("\\")[1] !== filename
-      );
-
-      // Saving the updated project to the database
-      await project.save();
-      // Sending a success response with the updated project
-      res.json({ message: "Attachments removed successfully", project });
+      await project.deleteOne({ _id: req.params.id });
+      // Sending a success response
+      res.json({ message: "Project deleted successfully" });
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });
@@ -269,6 +210,21 @@ const projectController = {
 
       // Saving the updated project to the database
       await project.save();
+
+      try {
+        const user = await User.findById(memberId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        user.assignedTo = null;
+        await user.save();
+      } catch (error) {
+        console.error(`Error while removing user from project ${id}:`, error);
+        res
+          .status(500)
+          .send(`Error while removing user from project ${id}:`, error);
+      }
+
       // Sending a success response with the updated project
       res.json({ message: "Member removed successfully", project });
     } catch (error) {
