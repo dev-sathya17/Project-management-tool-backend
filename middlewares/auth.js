@@ -119,6 +119,12 @@ const auth = {
         .send({ message: "an error occured during admin check", error });
     }
   },
+
+  // Middleware for cache control
+  cacheControl: (request, response, next) => {
+    response.setHeader("Cache-Control", "no-store");
+    next();
+  },
 };
 
 module.exports = auth;

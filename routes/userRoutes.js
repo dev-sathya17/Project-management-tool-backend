@@ -26,6 +26,7 @@ userRouter.get(
   "/logout",
   auth.authenticate,
   auth.isActivated,
+  auth.cacheControl,
   userController.logout
 );
 
