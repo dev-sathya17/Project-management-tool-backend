@@ -42,6 +42,13 @@ const userController = {
         return res.json({ message: "User with this email already exists" });
       }
 
+      // Checking if mobile number already exists
+      const existingMobile = await User.findOne({ email });
+
+      if (existingMobile) {
+        return res.json({ message: "Mobile number must be unique" });
+      }
+
       // Encrypting the password
       const hashedPassword = await bcrypt.hash(password, 10);
 
