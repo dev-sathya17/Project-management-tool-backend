@@ -43,7 +43,7 @@ const userController = {
       }
 
       // Checking if mobile number already exists
-      const existingMobile = await User.findOne({ email });
+      const existingMobile = await User.findOne({ mobile });
 
       if (existingMobile) {
         return res.json({ message: "Mobile number must be unique" });
