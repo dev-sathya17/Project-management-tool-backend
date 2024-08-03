@@ -54,7 +54,7 @@ const userController = {
         salaryPerMonth,
         mobile,
         role,
-        image: req.file ? req.file.path : "avatar.png",
+        image: req.file ? req.file.path : "uploads/avatar.png",
       });
 
       // Saving the user to the database
@@ -118,7 +118,10 @@ const userController = {
 
       // if the user is not active, return an error response
       if (!user.isActive) {
-        return res.status(403).send({ message: "User account is not active" });
+        return res.status(403).send({
+          message:
+            "User account is not active. Kindly check your email to activate your account.",
+        });
       }
 
       // if the user exists check the password

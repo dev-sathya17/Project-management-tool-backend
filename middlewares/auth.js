@@ -83,7 +83,10 @@ const auth = {
       if (!user.isActive) {
         return response
           .status(403)
-          .send({ message: "User account is not active" });
+          .send({
+            message:
+              "User account is not active. Kindly check your email to activate your account",
+          });
       }
 
       // If user is active, call the next middleware
